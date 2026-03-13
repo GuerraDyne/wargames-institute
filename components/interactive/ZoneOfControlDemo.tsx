@@ -19,6 +19,8 @@ interface GameState {
   turnCount: number;
   gameLog: string[];
   winner: Player;
+  objectiveControl: Player; // Who controls objective
+  objectiveControlTurns: number; // Consecutive turns held
 }
 
 const HEX_SIZE = 35;
@@ -166,9 +168,39 @@ export const ZoneOfControlDemo: React.FC = () => {
     return playerUnits.length > 0 && playerUnits.every(h => h.movesLeft === 0);
   };
 
-  const autoEndTurn = (hexes: Hex[], log: string[], currentTurn: number): { hexes: Hex[], log: string[], currentPlayer: Player, turnCount: number } => {
+  const autoEndTurn = (hexes: Hex[], log: string[], currentTurn: number, objControl: Player, objControlTurns: number): {
+    hexes: Hex[],
+    log: string[],
+    currentPlayer: Player,
+    turnCount: number,
+    objectiveControl: Player,
+    objectiveControlTurns: number,
+  } => {
     const nextPlayer = gameState.currentPlayer === 'blue' ? 'red' : 'blue';
     const newLog = [...log];
+
+    // Check who controls objective now
+    const objHex = hexes.find(h => h.col === OBJECTIVE.col && h.row === OBJECTIVE.row);
+    const currentObjControl = objHex?.unit || null;
+
+    let newObjControl = currentObjControl;
+    let newObjControlTurns = objControlTurns;
+
+    // Update objective control tracking at end of turn
+    if (currentObjControl === objControl) {
+      // Same player still controls it - increment counter
+      newObjControlTurns = objControlTurns + 1;
+    } else {
+      // Control changed or lost
+      newObjControl = currentObjControl;
+      newObjControlTurns = currentObjControl ? 1 : 0;
+    }
+
+    // Show objective control status
+    if (newObjControl && newObjControlTurns > 0) {
+      newLog.push(`🎯 ${newObjControl === 'blue' ? 'Blue' : 'Red'} holds objective (${newObjControlTurns}/3 turns)`);
+    }
+
     newLog.push(`⏭️ Turn ended - ${nextPlayer === 'blue' ? '🔵 Blue' : '🔴 Red'} turn`);
 
     // Reset movesLeft for all units
@@ -179,6 +211,8 @@ export const ZoneOfControlDemo: React.FC = () => {
       log: newLog.slice(-6),
       currentPlayer: nextPlayer,
       turnCount: nextPlayer === 'blue' ? currentTurn + 1 : currentTurn,
+      objectiveControl: newObjControl,
+      objectiveControlTurns: newObjControlTurns,
     };
   };
 
@@ -243,16 +277,12 @@ export const ZoneOfControlDemo: React.FC = () => {
           }
         }
 
-        // Check if objective is controlled (don't end game)
-        const isObjective = col === OBJECTIVE.col && row === OBJECTIVE.row;
-        if (isObjective) {
-          newLog.push(`🎯 ${gameState.currentPlayer === 'blue' ? 'Blue' : 'Red'} controls objective!`);
-        }
-
-        // Check elimination victory
+        // Check victory conditions
         const blueUnits = newHexes.filter(h => h.unit === 'blue').length;
         const redUnits = newHexes.filter(h => h.unit === 'red').length;
         let winner: Player = null;
+
+        // Victory condition 1: Total elimination
         if (blueUnits === 0) {
           winner = 'red';
           newLog.push('🎉 RED WINS! All blue eliminated!');
@@ -260,18 +290,52 @@ export const ZoneOfControlDemo: React.FC = () => {
           winner = 'blue';
           newLog.push('🎉 BLUE WINS! All red eliminated!');
         }
+        // Victory condition 2: Overwhelming advantage (enemy has 1 unit, you have 2+)
+        else if (blueUnits === 1 && redUnits >= 2) {
+          winner = 'red';
+          newLog.push('🎉 RED WINS! Blue cannot attack (1 unit vs 2+)!');
+        } else if (redUnits === 1 && blueUnits >= 2) {
+          winner = 'blue';
+          newLog.push('🎉 BLUE WINS! Red cannot attack (1 unit vs 2+)!');
+        }
+        // Victory condition 3: Held objective for 3 turns (checked at end of turn)
+        else if (gameState.objectiveControlTurns >= 3) {
+          winner = gameState.objectiveControl;
+          newLog.push(`🎉 ${winner === 'blue' ? 'BLUE' : 'RED'} WINS! Held objective 3 turns!`);
+        }
 
         // Check if turn should auto-end
         if (turnEnded || shouldAutoEndTurn(newHexes, gameState.currentPlayer)) {
-          const endTurnResult = autoEndTurn(newHexes, newLog, gameState.turnCount);
-          setGameState({
-            hexes: endTurnResult.hexes,
-            selectedUnit: null,
-            currentPlayer: endTurnResult.currentPlayer,
-            turnCount: endTurnResult.turnCount,
-            gameLog: endTurnResult.log,
-            winner,
-          });
+          const endTurnResult = autoEndTurn(newHexes, newLog, gameState.turnCount, gameState.objectiveControl, gameState.objectiveControlTurns);
+
+          // Check objective control victory AFTER turn ends
+          if (!winner && endTurnResult.objectiveControlTurns >= 3) {
+            winner = endTurnResult.objectiveControl;
+            const victoryLog = [...endTurnResult.log];
+            victoryLog.push(`🎉 ${winner === 'blue' ? 'BLUE' : 'RED'} WINS! Held objective 3 turns!`);
+
+            setGameState({
+              hexes: endTurnResult.hexes,
+              selectedUnit: null,
+              currentPlayer: endTurnResult.currentPlayer,
+              turnCount: endTurnResult.turnCount,
+              gameLog: victoryLog.slice(-6),
+              winner,
+              objectiveControl: endTurnResult.objectiveControl,
+              objectiveControlTurns: endTurnResult.objectiveControlTurns,
+            });
+          } else {
+            setGameState({
+              hexes: endTurnResult.hexes,
+              selectedUnit: null,
+              currentPlayer: endTurnResult.currentPlayer,
+              turnCount: endTurnResult.turnCount,
+              gameLog: endTurnResult.log,
+              winner,
+              objectiveControl: endTurnResult.objectiveControl,
+              objectiveControlTurns: endTurnResult.objectiveControlTurns,
+            });
+          }
         } else {
           setGameState({
             hexes: newHexes,
@@ -280,6 +344,8 @@ export const ZoneOfControlDemo: React.FC = () => {
             turnCount: gameState.turnCount,
             gameLog: newLog.slice(-6),
             winner,
+            objectiveControl: gameState.objectiveControl,
+            objectiveControlTurns: gameState.objectiveControlTurns,
           });
         }
       }
@@ -292,8 +358,10 @@ export const ZoneOfControlDemo: React.FC = () => {
       selectedUnit: null,
       currentPlayer: 'blue',
       turnCount: 1,
-      gameLog: ['🎯 Control the objective!', '🔵 Blue turn: 2 moves per unit'],
+      gameLog: ['🎯 Hold objective 3 turns to win!', '🔵 Blue turn: 2 moves per unit'],
       winner: null,
+      objectiveControl: null,
+      objectiveControlTurns: 0,
     });
   };
 
@@ -436,6 +504,11 @@ export const ZoneOfControlDemo: React.FC = () => {
               <div className="text-tactical-amber">
                 🎯 {objControl ? `${objControl.unit === 'blue' ? 'Blue' : 'Red'} controls` : 'Contested'}
               </div>
+              {gameState.objectiveControl && (
+                <div className="text-tactical-cyan text-xs">
+                  Held: {gameState.objectiveControlTurns}/3 turns
+                </div>
+              )}
             </div>
           </div>
 
@@ -446,10 +519,12 @@ export const ZoneOfControlDemo: React.FC = () => {
             <ul className="text-xs space-y-2 text-muted">
               <li>• Each unit gets <strong className="text-tactical-cyan">2 moves</strong> per turn</li>
               <li>• <strong className="text-tactical-amber">ZOC: Entering enemy zone STOPS movement</strong></li>
-              <li>• Enemy zones shown with amber dots</li>
               <li>• <strong>Combat: Need 2+ units to kill</strong></li>
               <li>• Turn auto-ends when all units used or combat</li>
-              <li>• <strong className="text-tactical-cyan">Victory:</strong> Eliminate all enemies</li>
+              <li className="border-t border-tactical-cyan/20 pt-2 mt-2"><strong className="text-tactical-cyan">Victory:</strong></li>
+              <li className="ml-2">• Hold 🎯 for 3 turns, OR</li>
+              <li className="ml-2">• Total elimination, OR</li>
+              <li className="ml-2">• Reduce enemy to 1 unit (can't attack)</li>
             </ul>
           </div>
 
