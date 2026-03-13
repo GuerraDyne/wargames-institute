@@ -56,10 +56,10 @@ export const ZoneOfControlDemo: React.FC = () => {
 
   const [hoveredHex, setHoveredHex] = useState<{ q: number; r: number } | null>(null);
 
-  // Axial to pixel conversion
+  // Axial to pixel conversion (flat-top hexagons)
   const hexToPixel = (q: number, r: number) => {
-    const x = HEX_SIZE * (Math.sqrt(3) * q + Math.sqrt(3) / 2 * r) + 250;
-    const y = HEX_SIZE * (3 / 2 * r) + 100;
+    const x = HEX_SIZE * (3 / 2 * q) + 60;
+    const y = HEX_SIZE * Math.sqrt(3) * (r + q / 2) + 60;
     return { x, y };
   };
 
@@ -181,7 +181,7 @@ export const ZoneOfControlDemo: React.FC = () => {
     const inZOC = isInEnemyZOC(q, r, gameState.currentPlayer);
 
     const points = Array.from({ length: 6 }, (_, i) => {
-      const angle = (Math.PI / 3) * i;
+      const angle = (Math.PI / 3) * i + Math.PI / 6; // Offset by 30 degrees for flat-top
       const px = x + HEX_SIZE * Math.cos(angle);
       const py = y + HEX_SIZE * Math.sin(angle);
       return `${px},${py}`;
