@@ -192,19 +192,19 @@ export const projectProfiles: ProjectProfile[] = [
     ],
   },
   {
-    title: "Teaching Warhammer 40K: Mechanics Before Lore",
-    slug: "warhammer-40k-teaching-guide",
+    title: "Learning Littoral Commander: Build Complexity Layer by Layer",
+    slug: "littoral-commander-teaching-guide",
     type: "Game Guide",
-    summary: "A teaching approach for Warhammer 40,000 that prioritizes understanding the core game loop before drowning in factions and special rules.",
+    summary: "A teaching approach for Littoral Commander that starts with core concepts and gradually layers in detection, missiles, and electronic warfare.",
     tags: [
-      "Miniatures wargaming",
+      "Modern naval warfare",
       "Teaching guide",
       "Game structure",
     ],
     body: [
-      "Warhammer 40K is overwhelming for new players. There are dozens of factions, hundreds of units, and endless special rules.",
-      "The trick is to teach the game structure first: movement, shooting, assault, morale. Use generic Space Marines vs generic Chaos. Keep it simple.",
-      "Once players understand how the game flows, then you introduce faction-specific rules and the deeper tactical options. Mechanics first, chrome later.",
+      "Littoral Commander models modern naval combat in coastal waters. It's a complex system with detection, missiles, electronic warfare, and overlapping sensor ranges.",
+      "The trick is to teach the core loop first: detection, targeting, engagement. Start with simple scenarios where everything is visible and missiles always hit.",
+      "Once players understand the basic cycle, then you layer in detection rolls, countermeasures, and electronic warfare. Mechanics first, chrome later.",
     ],
   },
 ];

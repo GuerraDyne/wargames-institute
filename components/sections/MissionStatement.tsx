@@ -43,7 +43,7 @@ export const MissionStatement: React.FC = () => {
                   <span className="text-tactical-cyan font-semibold">Wargames are more than just games—they're systems that model decisions, friction, and strategic trade-offs.</span>
                 </p>
                 <p className="text-muted leading-relaxed">
-                  Whether you're playing <span className="text-foreground font-semibold">Twilight Struggle</span>, <span className="text-foreground font-semibold">Next War</span>, or <span className="text-foreground font-semibold">Warhammer 40K</span>, every mechanic is teaching something about the problem it's modeling.
+                  Whether you're playing <span className="text-foreground font-semibold">Twilight Struggle</span>, <span className="text-foreground font-semibold">Next War</span>, or <span className="text-foreground font-semibold">Littoral Commander</span>, every mechanic is teaching something about the problem it's modeling.
                 </p>
                 <p className="text-muted leading-relaxed mt-4">
                   <span className="text-tactical-amber font-semibold">Wargames Institute exists to help you understand what those mechanics are doing and why they matter.</span>
