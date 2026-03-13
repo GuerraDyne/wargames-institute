@@ -25,16 +25,41 @@ export const Hero: React.FC = () => {
       {/* Content */}
       <div className="container mx-auto px-6 relative z-10">
         {mapRevealed ? (
-          <button
-            type="button"
-            onClick={toggleMapReveal}
-            className="absolute right-6 top-24 z-20 inline-flex items-center gap-3 border border-tactical-cyan/30 bg-background/60 px-4 py-3 font-mono text-xs uppercase tracking-[0.22em] text-tactical-cyan backdrop-blur-sm transition-colors hover:bg-background/80"
-          >
-            <span>Raise Briefing</span>
-            <span className="flex h-8 w-8 items-center justify-center rounded-full border border-tactical-cyan/30">
-              ↑
-            </span>
-          </button>
+          <>
+            <button
+              type="button"
+              onClick={toggleMapReveal}
+              className="absolute right-6 top-24 z-20 inline-flex items-center gap-3 border border-tactical-cyan/30 bg-background/60 px-4 py-3 font-mono text-xs uppercase tracking-[0.22em] text-tactical-cyan backdrop-blur-sm transition-colors hover:bg-background/80"
+            >
+              <span>Raise Briefing</span>
+              <span className="flex h-8 w-8 items-center justify-center rounded-full border border-tactical-cyan/30">
+                ↑
+              </span>
+            </button>
+
+            {/* Play Button - Appears only when map revealed */}
+            <motion.div
+              className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-20"
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.4, delay: 0.3 }}
+            >
+              <Link href="/skirmish-demo/" target="_blank">
+                <button className="group relative overflow-hidden border-2 border-tactical-cyan bg-background/90 px-12 py-6 font-mono text-2xl font-bold uppercase tracking-[0.3em] text-tactical-cyan backdrop-blur-md transition-all hover:bg-tactical-cyan/10 hover:scale-105 hover:shadow-[0_0_30px_rgba(74,159,184,0.4)]">
+                  {/* Corner brackets */}
+                  <div className="absolute top-0 left-0 w-4 h-4 border-t-2 border-l-2 border-tactical-amber" />
+                  <div className="absolute top-0 right-0 w-4 h-4 border-t-2 border-r-2 border-tactical-amber" />
+                  <div className="absolute bottom-0 left-0 w-4 h-4 border-b-2 border-l-2 border-tactical-amber" />
+                  <div className="absolute bottom-0 right-0 w-4 h-4 border-b-2 border-r-2 border-tactical-amber" />
+
+                  <span className="relative z-10">PLAY</span>
+
+                  {/* Animated glow effect */}
+                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-tactical-cyan/20 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
+                </button>
+              </Link>
+            </motion.div>
+          </>
         ) : null}
 
         <motion.div
