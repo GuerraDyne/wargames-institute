@@ -6,47 +6,66 @@ import { Button, Card } from '../ui';
 type Player = 'blue' | 'red' | null;
 
 interface Hex {
-  q: number;
-  r: number;
+  col: number;
+  row: number;
   unit: Player;
   isSupplySource: boolean;
-  isBlocked: boolean; // For enemy interdiction
+  movesLeft: number;
 }
 
 interface GameState {
   hexes: Hex[];
-  selectedUnit: { q: number; r: number } | null;
+  selectedUnit: { col: number; row: number } | null;
   currentPlayer: Player;
   turnCount: number;
   gameLog: string[];
-  supplyPaths: { q: number; r: number }[][];
 }
 
 const HEX_SIZE = 30;
-const MAP_WIDTH = 9;
-const MAP_HEIGHT = 5;
+const MAP_COLS = 11;
+const MAP_ROWS = 7;
 
-// Initial setup: Linear supply line scenario
-const INITIAL_HEXES: Hex[] = [
-  // Blue supply source (rear area)
-  { q: 0, r: 2, unit: null, isSupplySource: true, isBlocked: false },
+// Create full hex grid
+const createFullGrid = (): Hex[] => {
+  const hexes: Hex[] = [];
+  for (let row = 0; row < MAP_ROWS; row++) {
+    for (let col = 0; col < MAP_COLS; col++) {
+      hexes.push({
+        col,
+        row,
+        unit: null,
+        isSupplySource: false,
+        movesLeft: 2,
+      });
+    }
+  }
+  return hexes;
+};
 
-  // Blue supply line
-  { q: 1, r: 2, unit: 'blue', isSupplySource: false, isBlocked: false },
-  { q: 2, r: 2, unit: null, isSupplySource: false, isBlocked: false },
-  { q: 3, r: 2, unit: 'blue', isSupplySource: false, isBlocked: false },
-  { q: 4, r: 2, unit: null, isSupplySource: false, isBlocked: false },
+// Initial setup: Supply line scenario
+const INITIAL_HEXES = (() => {
+  const hexes = createFullGrid();
 
-  // Blue front line units
-  { q: 5, r: 2, unit: 'blue', isSupplySource: false, isBlocked: false },
-  { q: 6, r: 2, unit: 'blue', isSupplySource: false, isBlocked: false },
+  // Blue supply source (left edge)
+  hexes.find(h => h.col === 0 && h.row === 3)!.isSupplySource = true;
 
-  // Red attackers (can move to cut supply)
-  { q: 4, r: 0, unit: 'red', isSupplySource: false, isBlocked: false },
-  { q: 5, r: 0, unit: 'red', isSupplySource: false, isBlocked: false },
-  { q: 4, r: 4, unit: 'red', isSupplySource: false, isBlocked: false },
-  { q: 5, r: 4, unit: 'red', isSupplySource: false, isBlocked: false },
-];
+  // Blue supply line units (connected path to front)
+  hexes.find(h => h.col === 2 && h.row === 3)!.unit = 'blue';
+  hexes.find(h => h.col === 4 && h.row === 3)!.unit = 'blue';
+  hexes.find(h => h.col === 6 && h.row === 3)!.unit = 'blue';
+
+  // Blue front line units (need supply)
+  hexes.find(h => h.col === 8 && h.row === 3)!.unit = 'blue';
+  hexes.find(h => h.col === 9 && h.row === 3)!.unit = 'blue';
+
+  // Red units (can move to cut supply line)
+  hexes.find(h => h.col === 4 && h.row === 1)!.unit = 'red';
+  hexes.find(h => h.col === 5 && h.row === 1)!.unit = 'red';
+  hexes.find(h => h.col === 4 && h.row === 5)!.unit = 'red';
+  hexes.find(h => h.col === 5 && h.row === 5)!.unit = 'red';
+
+  return hexes;
+})();
 
 export const SupplyLinesDemo: React.FC = () => {
   const [gameState, setGameState] = useState<GameState>({
@@ -54,92 +73,82 @@ export const SupplyLinesDemo: React.FC = () => {
     selectedUnit: null,
     currentPlayer: 'red',
     turnCount: 1,
-    gameLog: ['🔴 Red: Cut Blue\'s supply line!', '🔵 Blue: Maintain supply to front line units!'],
-    supplyPaths: [],
+    gameLog: ['🔴 Red: Move to cut Blue\'s supply line!', '🔵 Blue: Protect your supply route!'],
   });
 
-  const [hoveredHex, setHoveredHex] = useState<{ q: number; r: number } | null>(null);
+  const [hoveredHex, setHoveredHex] = useState<{ col: number; row: number } | null>(null);
 
-  // Offset coordinate to pixel (creates rectangular grid)
+  // Flat-top hex with odd-r offset coordinates
   const hexToPixel = (col: number, row: number) => {
-    // For flat-top hex: width = sqrt(3) * size, height = 2 * size
     const hexWidth = Math.sqrt(3) * HEX_SIZE;
     const hexHeight = 2 * HEX_SIZE;
 
-    const x = col * hexWidth + (row % 2 === 1 ? hexWidth / 2 : 0) + 80;
-    const y = row * hexHeight * 0.75 + 80;
+    const x = col * hexWidth + (row % 2 === 1 ? hexWidth / 2 : 0) + 60;
+    const y = row * hexHeight * 0.75 + 60;
 
     return { x, y };
   };
 
-  // Get all adjacent hexes (6 neighbors) - adjusted for odd-r offset
-  const getNeighbors = (q: number, r: number) => {
-    const isOddRow = r % 2 === 1;
-    let neighbors;
+  // Get adjacent hexes (odd-r offset coordinates)
+  const getAdjacentHexes = (col: number, row: number) => {
+    const isOddRow = row % 2 === 1;
+    const neighbors = isOddRow ? [
+      { col: col, row: row - 1 },     // Top
+      { col: col, row: row + 1 },     // Bottom
+      { col: col - 1, row: row },     // Left
+      { col: col + 1, row: row },     // Right
+      { col: col + 1, row: row - 1 }, // Top-right
+      { col: col + 1, row: row + 1 }, // Bottom-right
+    ] : [
+      { col: col, row: row - 1 },     // Top
+      { col: col, row: row + 1 },     // Bottom
+      { col: col - 1, row: row },     // Left
+      { col: col + 1, row: row },     // Right
+      { col: col - 1, row: row - 1 }, // Top-left
+      { col: col - 1, row: row + 1 }, // Bottom-left
+    ];
 
-    if (isOddRow) {
-      neighbors = [
-        { q: q + 1, r: r },     // E
-        { q: q - 1, r: r },     // W
-        { q: q + 1, r: r - 1 }, // NE
-        { q: q, r: r - 1 },     // NW
-        { q: q + 1, r: r + 1 }, // SE
-        { q: q, r: r + 1 },     // SW
-      ];
-    } else {
-      neighbors = [
-        { q: q + 1, r: r },     // E
-        { q: q - 1, r: r },     // W
-        { q: q, r: r - 1 },     // NE
-        { q: q - 1, r: r - 1 }, // NW
-        { q: q, r: r + 1 },     // SE
-        { q: q - 1, r: r + 1 }, // SW
-      ];
-    }
+    const unique = neighbors.filter((n, i, arr) =>
+      arr.findIndex(x => x.col === n.col && x.row === n.row) === i
+    );
 
-    return neighbors.filter(hex => hex.q >= 0 && hex.q < MAP_WIDTH && hex.r >= 0 && hex.r < MAP_HEIGHT);
-  };
-
-  // Get hex data
-  const getHexAt = (q: number, r: number) => {
-    return gameState.hexes.find(h => h.q === q && h.r === r);
+    return unique.filter(n =>
+      n.col >= 0 && n.col < MAP_COLS && n.row >= 0 && n.row < MAP_ROWS
+    );
   };
 
   // BFS to find supply path
-  const findSupplyPath = (fromQ: number, fromR: number, player: Player): { q: number; r: number }[] | null => {
-    const queue: { q: number; r: number; path: { q: number; r: number }[] }[] = [
-      { q: fromQ, r: fromR, path: [{ q: fromQ, r: fromR }] }
+  const findSupplyPath = (fromCol: number, fromRow: number, hexArray: Hex[]): { col: number; row: number }[] | null => {
+    const queue: { col: number; row: number; path: { col: number; row: number }[] }[] = [
+      { col: fromCol, row: fromRow, path: [{ col: fromCol, row: fromRow }] }
     ];
     const visited = new Set<string>();
 
     while (queue.length > 0) {
       const current = queue.shift()!;
-      const key = `${current.q},${current.r}`;
+      const key = `${current.col},${current.row}`;
 
       if (visited.has(key)) continue;
       visited.add(key);
 
-      const hex = getHexAt(current.q, current.r);
+      const hex = hexArray.find(h => h.col === current.col && h.row === current.row);
+      if (!hex) continue;
 
       // Found supply source!
-      if (hex?.isSupplySource) {
+      if (hex.isSupplySource) {
         return current.path;
       }
 
-      // Can't trace through enemy units or blocked hexes
-      if (hex?.unit && hex.unit !== player) continue;
-      if (hex?.isBlocked) continue;
+      // Can't trace through enemy units
+      if (hex.unit === 'red') continue;
 
       // Explore neighbors
-      const neighbors = getNeighbors(current.q, current.r);
+      const neighbors = getAdjacentHexes(current.col, current.row);
       for (const neighbor of neighbors) {
-        const neighborHex = getHexAt(neighbor.q, neighbor.r);
-        if (!neighborHex) continue;
-
         queue.push({
-          q: neighbor.q,
-          r: neighbor.r,
-          path: [...current.path, { q: neighbor.q, r: neighbor.r }],
+          col: neighbor.col,
+          row: neighbor.row,
+          path: [...current.path, { col: neighbor.col, row: neighbor.row }],
         });
       }
     }
@@ -147,13 +156,13 @@ export const SupplyLinesDemo: React.FC = () => {
     return null; // No supply path found
   };
 
-  // Check which units are in supply
-  const calculateSupplyStatus = () => {
-    const paths: { q: number; r: number }[][] = [];
+  // Calculate supply paths for all Blue units
+  const calculateSupplyPaths = (hexArray: Hex[]) => {
+    const paths: { col: number; row: number }[][] = [];
 
-    gameState.hexes.forEach(hex => {
+    hexArray.forEach(hex => {
       if (hex.unit === 'blue' && !hex.isSupplySource) {
-        const path = findSupplyPath(hex.q, hex.r, 'blue');
+        const path = findSupplyPath(hex.col, hex.row, hexArray);
         if (path) {
           paths.push(path);
         }
@@ -163,73 +172,94 @@ export const SupplyLinesDemo: React.FC = () => {
     return paths;
   };
 
-  // Check if hex is a valid move
-  const isValidMove = (fromQ: number, fromR: number, toQ: number, toR: number): boolean => {
-    const neighbors = getNeighbors(fromQ, fromR);
-    const isAdjacent = neighbors.some(n => n.q === toQ && n.r === toR);
-
+  // Check if move is valid
+  const isValidMove = (fromCol: number, fromRow: number, toCol: number, toRow: number, hexArray: Hex[]): boolean => {
+    const neighbors = getAdjacentHexes(fromCol, fromRow);
+    const isAdjacent = neighbors.some(n => n.col === toCol && n.row === toRow);
     if (!isAdjacent) return false;
 
-    const destHex = getHexAt(toQ, toR);
-    if (destHex?.unit) return false; // Can't move into occupied hex
-    if (destHex?.isSupplySource) return false; // Can't move into supply source
+    const destHex = hexArray.find(h => h.col === toCol && h.row === toRow);
+    if (!destHex) return false;
+    if (destHex.unit) return false; // Can't move into occupied hex
+    if (destHex.isSupplySource) return false; // Can't move into supply source
 
     return true;
   };
 
   // Handle hex click
-  const handleHexClick = (q: number, r: number) => {
-    const clickedHex = getHexAt(q, r);
+  const handleHexClick = (col: number, row: number) => {
+    const clickedHex = gameState.hexes.find(h => h.col === col && h.row === row);
+    if (!clickedHex) return;
 
     // Select own unit
-    if (clickedHex?.unit === gameState.currentPlayer) {
+    if (clickedHex.unit === gameState.currentPlayer && clickedHex.movesLeft > 0) {
       setGameState(prev => ({
         ...prev,
-        selectedUnit: { q, r },
+        selectedUnit: { col, row },
       }));
       return;
     }
 
     // Move selected unit
     if (gameState.selectedUnit) {
-      const { q: fromQ, r: fromR } = gameState.selectedUnit;
+      const { col: fromCol, row: fromRow } = gameState.selectedUnit;
+      const movingUnit = gameState.hexes.find(h => h.col === fromCol && h.row === fromRow);
 
-      if (isValidMove(fromQ, fromR, q, r)) {
+      if (!movingUnit || movingUnit.movesLeft <= 0) {
+        setGameState(prev => ({ ...prev, selectedUnit: null }));
+        return;
+      }
+
+      if (isValidMove(fromCol, fromRow, col, row, gameState.hexes)) {
         const newHexes = gameState.hexes.map(h => {
-          if (h.q === fromQ && h.r === fromR) {
+          if (h.col === fromCol && h.row === fromRow) {
             return { ...h, unit: null };
           }
-          if (h.q === q && h.r === r) {
-            return { ...h, unit: gameState.currentPlayer };
+          if (h.col === col && h.row === row) {
+            return { ...h, unit: gameState.currentPlayer, movesLeft: movingUnit.movesLeft - 1 };
           }
           return h;
         });
 
         const newLog = [...gameState.gameLog];
-        newLog.push(`${gameState.currentPlayer === 'blue' ? '🔵' : '🔴'} Moved to (${q},${r})`);
+        newLog.push(`${gameState.currentPlayer === 'blue' ? '🔵' : '🔴'} Moved to (${col},${row})`);
 
-        // Check if Red cut Blue's supply
-        const tempState = { ...gameState, hexes: newHexes };
-        const paths = calculateSupplyStatus();
-
-        // Count Blue units in supply
+        // Calculate new supply status
+        const paths = calculateSupplyPaths(newHexes);
         const blueUnitsInSupply = paths.length;
-        const totalBlueUnits = newHexes.filter(h => h.unit === 'blue' && !h.isSupplySource).length;
+        const totalBlueUnits = newHexes.filter(h => h.unit === 'blue').length;
 
-        if (gameState.currentPlayer === 'red' && blueUnitsInSupply < totalBlueUnits) {
-          newLog.push(`⚠️ Supply disrupted! ${totalBlueUnits - blueUnitsInSupply} Blue unit(s) out of supply!`);
+        if (blueUnitsInSupply < totalBlueUnits) {
+          newLog.push(`⚠️ ${totalBlueUnits - blueUnitsInSupply} Blue unit(s) OUT OF SUPPLY!`);
         }
+
+        // Check if should auto-end turn
+        const shouldAutoEnd = shouldAutoEndTurn(newHexes, gameState.currentPlayer);
 
         setGameState({
           hexes: newHexes,
           selectedUnit: null,
-          currentPlayer: gameState.currentPlayer === 'blue' ? 'red' : 'blue',
-          turnCount: gameState.currentPlayer === 'red' ? gameState.turnCount + 1 : gameState.turnCount,
+          currentPlayer: shouldAutoEnd ? (gameState.currentPlayer === 'blue' ? 'red' : 'blue') : gameState.currentPlayer,
+          turnCount: shouldAutoEnd && gameState.currentPlayer === 'red' ? gameState.turnCount + 1 : gameState.turnCount,
           gameLog: newLog.slice(-6),
-          supplyPaths: paths,
         });
+
+        // If auto-ending turn, reset moves
+        if (shouldAutoEnd) {
+          setTimeout(() => {
+            setGameState(prev => ({
+              ...prev,
+              hexes: prev.hexes.map(h => ({ ...h, movesLeft: 2 })),
+            }));
+          }, 100);
+        }
       }
     }
+  };
+
+  const shouldAutoEndTurn = (hexes: Hex[], player: Player): boolean => {
+    const playerUnits = hexes.filter(h => h.unit === player);
+    return playerUnits.length > 0 && playerUnits.every(h => h.movesLeft === 0);
   };
 
   const resetGame = () => {
@@ -238,31 +268,32 @@ export const SupplyLinesDemo: React.FC = () => {
       selectedUnit: null,
       currentPlayer: 'red',
       turnCount: 1,
-      gameLog: ['🔴 Red: Cut Blue\'s supply line!', '🔵 Blue: Maintain supply to front line units!'],
-      supplyPaths: [],
+      gameLog: ['🔴 Red: Move to cut Blue\'s supply line!', '🔵 Blue: Protect your supply route!'],
     });
   };
 
-  // Calculate supply status
-  const supplyPaths = calculateSupplyStatus();
+  // Calculate supply paths
+  const supplyPaths = calculateSupplyPaths(gameState.hexes);
   const blueUnitsInSupply = supplyPaths.length;
-  const totalBlueUnits = gameState.hexes.filter(h => h.unit === 'blue' && !h.isSupplySource).length;
+  const totalBlueUnits = gameState.hexes.filter(h => h.unit === 'blue').length;
 
   // Render hexagon
-  const renderHex = (q: number, r: number) => {
-    const { x, y } = hexToPixel(q, r);
-    const hex = getHexAt(q, r);
-    const isSelected = gameState.selectedUnit?.q === q && gameState.selectedUnit?.r === r;
-    const isHovered = hoveredHex?.q === q && hoveredHex?.r === r;
+  const renderHex = (col: number, row: number) => {
+    const { x, y } = hexToPixel(col, row);
+    const hex = gameState.hexes.find(h => h.col === col && h.row === row);
+    if (!hex) return null;
+
+    const isSelected = gameState.selectedUnit?.col === col && gameState.selectedUnit?.row === row;
+    const isHovered = hoveredHex?.col === col && hoveredHex?.row === row;
 
     // Check if this hex is on a supply path
     const isOnSupplyPath = supplyPaths.some(path =>
-      path.some(p => p.q === q && p.r === r)
+      path.some(p => p.col === col && p.row === row)
     );
 
-    // Check if this unit is out of supply
-    const isUnitOutOfSupply = hex?.unit === 'blue' && !hex.isSupplySource && !supplyPaths.some(path =>
-      path[0].q === q && path[0].r === r
+    // Check if this Blue unit is out of supply
+    const isUnitOutOfSupply = hex.unit === 'blue' && !hex.isSupplySource && !supplyPaths.some(path =>
+      path[0].col === col && path[0].row === row
     );
 
     const points = Array.from({ length: 6 }, (_, i) => {
@@ -273,15 +304,15 @@ export const SupplyLinesDemo: React.FC = () => {
     }).join(' ');
 
     let fillColor = '#1a1a1a';
-    if (hex?.isSupplySource) fillColor = '#2a3a1a';
-    if (hex?.unit === 'blue') fillColor = '#1a3a5a';
-    if (hex?.unit === 'red') fillColor = '#5a1a1a';
+    if (hex.isSupplySource) fillColor = '#2a3a1a';
+    if (hex.unit === 'blue') fillColor = '#1a3a5a';
+    if (hex.unit === 'red') fillColor = '#5a1a1a';
     if (isSelected) fillColor = '#2a5a2a';
-    if (isOnSupplyPath && !hex?.unit) fillColor = '#1a2a1a';
+    if (isOnSupplyPath && !hex.unit && !hex.isSupplySource) fillColor = '#1a2a1a';
 
     let strokeColor = '#3d5a80';
     let strokeWidth = 1;
-    if (hex?.isSupplySource) {
+    if (hex.isSupplySource) {
       strokeColor = '#4a9fb8';
       strokeWidth = 2;
     }
@@ -292,26 +323,26 @@ export const SupplyLinesDemo: React.FC = () => {
     if (isHovered) strokeWidth = 2;
 
     return (
-      <g key={`${q}-${r}`}>
+      <g key={`${col}-${row}`}>
         <polygon
           points={points}
           fill={fillColor}
           stroke={strokeColor}
           strokeWidth={strokeWidth}
           className="cursor-pointer transition-all"
-          onClick={() => handleHexClick(q, r)}
-          onMouseEnter={() => setHoveredHex({ q, r })}
+          onClick={() => handleHexClick(col, row)}
+          onMouseEnter={() => setHoveredHex({ col, row })}
           onMouseLeave={() => setHoveredHex(null)}
           opacity={0.9}
         />
 
         {/* Supply path indicator */}
-        {isOnSupplyPath && !hex?.unit && (
+        {isOnSupplyPath && !hex.unit && !hex.isSupplySource && (
           <circle cx={x} cy={y} r={4} fill="#4a9fb8" opacity={0.5} />
         )}
 
         {/* Unit marker */}
-        {hex?.unit && (
+        {hex.unit && (
           <g>
             <rect
               x={x - 15}
@@ -322,6 +353,7 @@ export const SupplyLinesDemo: React.FC = () => {
               stroke={hex.unit === 'blue' ? '#6abfdf' : '#f47464'}
               strokeWidth={2}
               rx={2}
+              opacity={isUnitOutOfSupply ? 0.5 : 1}
             />
             <text
               x={x}
@@ -341,11 +373,21 @@ export const SupplyLinesDemo: React.FC = () => {
                 ⚠️
               </text>
             )}
+
+            {/* Moves remaining */}
+            {hex.movesLeft < 2 && hex.unit === gameState.currentPlayer && (
+              <circle cx={x + 12} cy={y - 12} r={6} fill="#2a2a2a" stroke="#4a9fb8" strokeWidth={1} />
+            )}
+            {hex.movesLeft < 2 && hex.unit === gameState.currentPlayer && (
+              <text x={x + 12} y={y - 9} textAnchor="middle" fontSize="8" fill="#4a9fb8" fontFamily="monospace">
+                {hex.movesLeft}
+              </text>
+            )}
           </g>
         )}
 
         {/* Supply source marker */}
-        {hex?.isSupplySource && (
+        {hex.isSupplySource && (
           <text x={x} y={y + 4} textAnchor="middle" fontSize="16">
             📦
           </text>
@@ -359,9 +401,9 @@ export const SupplyLinesDemo: React.FC = () => {
       <div className="grid grid-cols-1 lg:grid-cols-[1fr_300px] gap-6">
         {/* Game board */}
         <div>
-          <svg width="650" height="300" className="bg-background-tertiary border border-tactical-cyan/20">
-            {Array.from({ length: MAP_HEIGHT }, (_, r) =>
-              Array.from({ length: MAP_WIDTH }, (_, q) => renderHex(q, r))
+          <svg width="750" height="400" className="bg-background-tertiary border border-tactical-cyan/20">
+            {Array.from({ length: MAP_ROWS }, (_, row) =>
+              Array.from({ length: MAP_COLS }, (_, col) => renderHex(col, row))
             )}
           </svg>
 
@@ -382,7 +424,7 @@ export const SupplyLinesDemo: React.FC = () => {
               <div>Turn: {gameState.turnCount}</div>
               <div>Current: {gameState.currentPlayer === 'blue' ? '🔵 Blue' : '🔴 Red'}</div>
               <div className={blueUnitsInSupply === totalBlueUnits ? 'text-tactical-cyan' : 'text-tactical-amber'}>
-                Blue Units In Supply: {blueUnitsInSupply}/{totalBlueUnits}
+                Blue In Supply: {blueUnitsInSupply}/{totalBlueUnits}
               </div>
             </div>
           </div>
@@ -392,12 +434,12 @@ export const SupplyLinesDemo: React.FC = () => {
               Supply Rules
             </div>
             <ul className="text-xs space-y-2 text-muted">
-              <li>• Units must trace path to 📦 supply source</li>
-              <li>• Path cannot go through enemy units</li>
-              <li>• Out-of-supply units marked with ⚠️</li>
-              <li>• Green dots show active supply paths</li>
-              <li>• 🔴 Red objective: Cut Blue supply lines</li>
-              <li>• 🔵 Blue objective: Keep front supplied</li>
+              <li>• Blue units must trace path to 📦 supply depot</li>
+              <li>• Path cannot go through Red units</li>
+              <li>• Out-of-supply units: dimmed + ⚠️</li>
+              <li>• Cyan dots show active supply routes</li>
+              <li>• 🔴 Red: Cut Blue's supply line!</li>
+              <li>• 🔵 Blue: Keep supply route open!</li>
             </ul>
           </div>
 
@@ -413,7 +455,7 @@ export const SupplyLinesDemo: React.FC = () => {
           </div>
 
           <div className="bg-background-secondary p-3 text-xs text-muted">
-            <strong className="text-tactical-cyan">What This Teaches:</strong> Supply lines are critical in operational wargames. Units need logistics to fight effectively. Cutting enemy supply (interdiction) is often more decisive than direct combat. This mechanic forces players to protect their rear areas and creates strategic depth.
+            <strong className="text-tactical-cyan">What This Teaches:</strong> Supply lines are critical in operational wargames. Units need logistics to fight. Cutting enemy supply (interdiction) is often more decisive than direct combat. This forces players to protect rear areas and creates strategic depth.
           </div>
         </div>
       </div>
