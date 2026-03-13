@@ -21,24 +21,37 @@ interface GameState {
 }
 
 const HEX_SIZE = 30;
-const MAP_WIDTH = 8;
-const MAP_HEIGHT = 6;
 
 // Objective hex (center of map)
-const OBJECTIVE = { q: 4, r: 3 };
+const OBJECTIVE = { q: 0, r: 0 };
 
-// Initial unit positions
+// Create rectangular hex grid using axial coordinates
+// This defines which hexes exist in our rectangular board
+const createHexGrid = () => {
+  const hexes: { q: number; r: number }[] = [];
+  // Create a rectangular region in axial coordinates
+  for (let r = -2; r <= 2; r++) {
+    for (let q = -3; q <= 3; q++) {
+      hexes.push({ q, r });
+    }
+  }
+  return hexes;
+};
+
+const VALID_HEXES = createHexGrid();
+
+// Initial unit positions (using axial coordinates)
 const INITIAL_UNITS: Hex[] = [
-  // Blue (player) units - bottom row
-  { q: 2, r: 5, unit: 'blue' },
-  { q: 3, r: 5, unit: 'blue' },
-  { q: 4, r: 5, unit: 'blue' },
-  { q: 5, r: 5, unit: 'blue' },
-  // Red (enemy) units - top row
-  { q: 2, r: 0, unit: 'red' },
-  { q: 3, r: 0, unit: 'red' },
-  { q: 4, r: 0, unit: 'red' },
-  { q: 5, r: 0, unit: 'red' },
+  // Blue (player) units - bottom
+  { q: -2, r: 2, unit: 'blue' },
+  { q: -1, r: 2, unit: 'blue' },
+  { q: 0, r: 2, unit: 'blue' },
+  { q: 1, r: 2, unit: 'blue' },
+  // Red (enemy) units - top
+  { q: -2, r: -2, unit: 'red' },
+  { q: -1, r: -2, unit: 'red' },
+  { q: 0, r: -2, unit: 'red' },
+  { q: 1, r: -2, unit: 'red' },
 ];
 
 export const ZoneOfControlDemo: React.FC = () => {
@@ -53,38 +66,22 @@ export const ZoneOfControlDemo: React.FC = () => {
 
   const [hoveredHex, setHoveredHex] = useState<{ q: number; r: number } | null>(null);
 
-  // Offset coordinate to pixel (creates rectangular grid)
-  const hexToPixel = (col: number, row: number) => {
-    const offsetX = (row % 2 === 1) ? HEX_SIZE * 3/4 : 0; // Odd rows shift right
-    const x = HEX_SIZE * 3/2 * col + offsetX + 60;
-    const y = HEX_SIZE * Math.sqrt(3) * row + 60;
+  // EXACT copy from working HexGridMap
+  const hexToPixel = (q: number, r: number) => {
+    const x = HEX_SIZE * (3/2 * q);
+    const y = HEX_SIZE * (Math.sqrt(3)/2 * q + Math.sqrt(3) * r);
     return { x, y };
   };
 
-  // Get all adjacent hexes (6 neighbors) - adjusted for odd-r offset
-  const getNeighbors = (q: number, r: number) => {
-    const isOddRow = r % 2 === 1;
-
-    if (isOddRow) {
-      return [
-        { q: q + 1, r: r },     // E
-        { q: q - 1, r: r },     // W
-        { q: q + 1, r: r - 1 }, // NE
-        { q: q, r: r - 1 },     // NW
-        { q: q + 1, r: r + 1 }, // SE
-        { q: q, r: r + 1 },     // SW
-      ];
-    } else {
-      return [
-        { q: q + 1, r: r },     // E
-        { q: q - 1, r: r },     // W
-        { q: q, r: r - 1 },     // NE
-        { q: q - 1, r: r - 1 }, // NW
-        { q: q, r: r + 1 },     // SE
-        { q: q - 1, r: r + 1 }, // SW
-      ];
-    }
-  };
+  // EXACT copy from working HexGridMap
+  const getNeighbors = (q: number, r: number) => [
+    { q: q + 1, r: r },
+    { q: q - 1, r: r },
+    { q: q, r: r + 1 },
+    { q: q, r: r - 1 },
+    { q: q + 1, r: r - 1 },
+    { q: q - 1, r: r + 1 },
+  ];
 
   // Check if a hex is in enemy ZOC
   const isInEnemyZOC = (q: number, r: number, player: Player): boolean => {
@@ -93,7 +90,8 @@ export const ZoneOfControlDemo: React.FC = () => {
     const neighbors = getNeighbors(q, r);
 
     return neighbors.some(neighbor => {
-      if (neighbor.q < 0 || neighbor.q >= MAP_WIDTH || neighbor.r < 0 || neighbor.r >= MAP_HEIGHT) return false;
+      // Check if neighbor is on the board
+      if (!VALID_HEXES.some(h => h.q === neighbor.q && h.r === neighbor.r)) return false;
       const unit = gameState.hexes.find(h => h.q === neighbor.q && h.r === neighbor.r);
       return unit?.unit === enemyPlayer;
     });
@@ -110,7 +108,8 @@ export const ZoneOfControlDemo: React.FC = () => {
     const isAdjacent = neighbors.some(n => n.q === toQ && n.r === toR);
 
     if (!isAdjacent) return false;
-    if (toQ < 0 || toQ >= MAP_WIDTH || toR < 0 || toR >= MAP_HEIGHT) return false;
+    // Check if destination is on the board
+    if (!VALID_HEXES.some(h => h.q === toQ && h.r === toR)) return false;
 
     return true;
   };
@@ -304,10 +303,8 @@ export const ZoneOfControlDemo: React.FC = () => {
       <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-6">
         {/* Game board */}
         <div>
-          <svg width="520" height="420" className="bg-background-tertiary border border-tactical-cyan/20">
-            {Array.from({ length: MAP_HEIGHT }, (_, r) =>
-              Array.from({ length: MAP_WIDTH }, (_, q) => renderHex(q, r))
-            )}
+          <svg width="520" height="420" className="bg-background-tertiary border border-tactical-cyan/20" viewBox="-150 -150 520 420">
+            {VALID_HEXES.map(({ q, r }) => renderHex(q, r))}
           </svg>
 
           <div className="mt-4 flex gap-3">
