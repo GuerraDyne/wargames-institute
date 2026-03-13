@@ -77,7 +77,7 @@ export default function AboutPage() {
               <Card hover={false}>
                 <h3 className="font-mono text-tactical-cyan uppercase tracking-wider mb-3">Content Philosophy</h3>
                 <p className="text-sm text-muted">
-                  All content is free and publicly accessible. We write game guides, mechanics analyses, and research pieces that treat wargaming as a serious intellectual activity, not just entertainment.
+                  We write game guides, mechanics analyses, and research pieces that treat wargaming as a serious intellectual activity, not just entertainment.
                 </p>
               </Card>
             </div>
@@ -117,7 +117,7 @@ export default function AboutPage() {
             </h2>
             <Card variant="tactical">
               <p className="text-lg leading-relaxed mb-4">
-                Build a comprehensive public resource for wargamers who want to understand the hobby more deeply—covering everything from <strong className="text-tactical-cyan">how to play complex games</strong> to <strong className="text-tactical-cyan">using wargames as research tools</strong>.
+                Build a comprehensive public resource for wargamers who want to understand the hobby more deeply—covering everything from <strong className="text-tactical-cyan">how to play complex games</strong> to <strong className="text-tactical-cyan">using wargames as research tools</strong> to <strong className="text-tactical-cyan">identifying new pedagogical methods</strong> that emerge from how wargames teach.
               </p>
               <div className="grid grid-cols-2 md:grid-cols-3 gap-3 text-sm text-muted mb-6">
                 <div className="flex items-center gap-2"><span className="text-tactical-cyan">•</span> Game Guides</div>
@@ -125,7 +125,7 @@ export default function AboutPage() {
                 <div className="flex items-center gap-2"><span className="text-tactical-cyan">•</span> Teaching Resources</div>
                 <div className="flex items-center gap-2"><span className="text-tactical-cyan">•</span> Design Methods</div>
                 <div className="flex items-center gap-2"><span className="text-tactical-cyan">•</span> Research Applications</div>
-                <div className="flex items-center gap-2"><span className="text-tactical-cyan">•</span> Historical Analysis</div>
+                <div className="flex items-center gap-2"><span className="text-tactical-cyan">•</span> Pedagogical Innovation</div>
               </div>
               <p className="text-lg text-tactical-amber">
                 The goal is to make wargaming more accessible to newcomers while providing depth for experienced players who want to understand <strong>why mechanics work</strong> and <strong>what they teach</strong>.

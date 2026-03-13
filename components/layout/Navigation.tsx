@@ -8,7 +8,7 @@ import { motion } from 'framer-motion';
 const navItems = [
   { label: 'Home', href: '/' },
   { label: 'About', href: '/about' },
-  { label: 'Wargames', href: '/wargames' },
+  { label: 'How Wargames Work', href: '/wargames' },
   { label: 'Research', href: '/research' },
   { label: 'Education', href: '/education' },
   { label: 'Projects', href: '/projects' },

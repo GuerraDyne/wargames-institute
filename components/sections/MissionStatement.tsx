@@ -102,7 +102,7 @@ export const MissionStatement: React.FC = () => {
             <div className="inline-block bg-background-tertiary border border-tactical-cyan/20 px-8 py-6">
               <p className="text-sm text-muted mb-2">COMMUNITY FOCUS</p>
               <p className="text-base max-w-2xl">
-                Building a comprehensive resource for wargamers who want to learn complex games, understand mechanics, and use wargames to explore real-world questions. Core content is publicly accessible, with advanced courses and research available through membership.
+                Building a comprehensive resource for wargamers who want to learn complex games, understand mechanics, and use wargames to explore real-world questions.
               </p>
             </div>
           </motion.div>
