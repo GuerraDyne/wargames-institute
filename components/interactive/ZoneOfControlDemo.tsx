@@ -160,22 +160,26 @@ export const ZoneOfControlDemo: React.FC = () => {
     return true;
   };
 
-  const endTurn = () => {
+  // Check if all current player's units are out of moves
+  const shouldAutoEndTurn = (hexes: Hex[], player: Player): boolean => {
+    const playerUnits = hexes.filter(h => h.unit === player);
+    return playerUnits.length > 0 && playerUnits.every(h => h.movesLeft === 0);
+  };
+
+  const autoEndTurn = (hexes: Hex[], log: string[], currentTurn: number): { hexes: Hex[], log: string[], currentPlayer: Player, turnCount: number } => {
     const nextPlayer = gameState.currentPlayer === 'blue' ? 'red' : 'blue';
-    const newLog = [...gameState.gameLog];
-    newLog.push(`${nextPlayer === 'blue' ? '🔵 Blue' : '🔴 Red'} turn`);
+    const newLog = [...log];
+    newLog.push(`⏭️ Turn ended - ${nextPlayer === 'blue' ? '🔵 Blue' : '🔴 Red'} turn`);
 
     // Reset movesLeft for all units
-    const resetHexes = gameState.hexes.map(h => ({ ...h, movesLeft: 2 }));
+    const resetHexes = hexes.map(h => ({ ...h, movesLeft: 2 }));
 
-    setGameState(prev => ({
-      ...prev,
+    return {
       hexes: resetHexes,
+      log: newLog.slice(-6),
       currentPlayer: nextPlayer,
-      selectedUnit: null,
-      turnCount: nextPlayer === 'blue' ? prev.turnCount + 1 : prev.turnCount,
-      gameLog: newLog.slice(-6),
-    }));
+      turnCount: nextPlayer === 'blue' ? currentTurn + 1 : currentTurn,
+    };
   };
 
   const handleHexClick = (col: number, row: number) => {
@@ -257,18 +261,15 @@ export const ZoneOfControlDemo: React.FC = () => {
           newLog.push('🎉 BLUE WINS! All red eliminated!');
         }
 
-        if (turnEnded) {
-          // Auto end turn after combat
-          const nextPlayer = gameState.currentPlayer === 'blue' ? 'red' : 'blue';
-          const resetHexes = newHexes.map(h => ({ ...h, movesLeft: 2 }));
-          newLog.push(`${nextPlayer === 'blue' ? '🔵 Blue' : '🔴 Red'} turn`);
-
+        // Check if turn should auto-end
+        if (turnEnded || shouldAutoEndTurn(newHexes, gameState.currentPlayer)) {
+          const endTurnResult = autoEndTurn(newHexes, newLog, gameState.turnCount);
           setGameState({
-            hexes: resetHexes,
+            hexes: endTurnResult.hexes,
             selectedUnit: null,
-            currentPlayer: nextPlayer,
-            turnCount: nextPlayer === 'blue' ? gameState.turnCount + 1 : gameState.turnCount,
-            gameLog: newLog.slice(-6),
+            currentPlayer: endTurnResult.currentPlayer,
+            turnCount: endTurnResult.turnCount,
+            gameLog: endTurnResult.log,
             winner,
           });
         } else {
@@ -414,11 +415,8 @@ export const ZoneOfControlDemo: React.FC = () => {
           </svg>
 
           <div className="mt-4 flex gap-3">
-            <Button variant="primary" onClick={endTurn} size="sm" disabled={gameState.winner !== null}>
-              End Turn
-            </Button>
             <Button variant="outline" onClick={resetGame} size="sm">
-              Reset
+              Reset Game
             </Button>
           </div>
         </div>
@@ -450,7 +448,7 @@ export const ZoneOfControlDemo: React.FC = () => {
               <li>• <strong className="text-tactical-amber">ZOC: Entering enemy zone STOPS movement</strong></li>
               <li>• Enemy zones shown with amber dots</li>
               <li>• <strong>Combat: Need 2+ units to kill</strong></li>
-              <li>• Attacking ends your turn</li>
+              <li>• Turn auto-ends when all units used or combat</li>
               <li>• <strong className="text-tactical-cyan">Victory:</strong> Eliminate all enemies</li>
             </ul>
           </div>
