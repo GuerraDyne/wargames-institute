@@ -44,7 +44,7 @@ export const Hero: React.FC = () => {
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.4, delay: 0.3 }}
             >
-              <Link href="/skirmish-demo/" target="_blank">
+              <Link href="/skirmish-demo/index.html" target="_blank">
                 <button className="group relative overflow-hidden border-2 border-tactical-cyan bg-background/90 px-12 py-6 font-mono text-2xl font-bold uppercase tracking-[0.3em] text-tactical-cyan backdrop-blur-md transition-all hover:bg-tactical-cyan/10 hover:scale-105 hover:shadow-[0_0_30px_rgba(74,159,184,0.4)]">
                   {/* Corner brackets */}
                   <div className="absolute top-0 left-0 w-4 h-4 border-t-2 border-l-2 border-tactical-amber" />
