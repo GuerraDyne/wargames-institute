@@ -141,11 +141,11 @@ export const ZoneOfControlDemo: React.FC = () => {
     });
   };
 
-  // Count adjacent friendly units
-  const countAdjacentFriendlies = (col: number, row: number, player: Player): number => {
+  // Count adjacent friendly units (using specific hex array)
+  const countAdjacentFriendlies = (col: number, row: number, player: Player, hexArray: Hex[]): number => {
     const neighbors = getAdjacentHexes(col, row);
     return neighbors.filter(n => {
-      const unit = getUnitAt(n.col, n.row);
+      const unit = hexArray.find(h => h.col === n.col && h.row === n.row);
       return unit?.unit === player;
     }).length;
   };
@@ -212,7 +212,8 @@ export const ZoneOfControlDemo: React.FC = () => {
 
         // Combat: need 2+ units adjacent to kill
         if (targetUnit && targetUnit.unit !== gameState.currentPlayer) {
-          const adjacentFriendlies = countAdjacentFriendlies(col, row, gameState.currentPlayer);
+          // Count friendlies AFTER removing the moving unit (so we don't count it twice)
+          const adjacentFriendlies = countAdjacentFriendlies(col, row, gameState.currentPlayer, newHexes);
 
           if (adjacentFriendlies >= 1) { // Moving unit + 1 already there = 2 total
             newHexes = newHexes.filter(h => !(h.col === col && h.row === row));
