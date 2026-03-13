@@ -9,7 +9,7 @@ interface Hex {
   col: number;
   row: number;
   unit: Player;
-  hasMoved: boolean; // Track if unit moved this turn
+  movesLeft: number; // Moves remaining this turn (max 2)
 }
 
 interface GameState {
@@ -23,23 +23,23 @@ interface GameState {
 
 const HEX_SIZE = 35;
 const MAP_COLS = 8;
-const MAP_ROWS = 6;
+const MAP_ROWS = 7;
 
 // Objective hex (center of map)
 const OBJECTIVE = { col: 4, row: 3 };
 
 // Initial unit positions
 const INITIAL_UNITS: Hex[] = [
-  // Blue (player) units - bottom row
-  { col: 2, row: 5, unit: 'blue', hasMoved: false },
-  { col: 3, row: 5, unit: 'blue', hasMoved: false },
-  { col: 4, row: 5, unit: 'blue', hasMoved: false },
-  { col: 5, row: 5, unit: 'blue', hasMoved: false },
+  // Blue (player) units - bottom row (now row 6)
+  { col: 2, row: 6, unit: 'blue', movesLeft: 2 },
+  { col: 3, row: 6, unit: 'blue', movesLeft: 2 },
+  { col: 4, row: 6, unit: 'blue', movesLeft: 2 },
+  { col: 5, row: 6, unit: 'blue', movesLeft: 2 },
   // Red (enemy) units - top row
-  { col: 2, row: 0, unit: 'red', hasMoved: false },
-  { col: 3, row: 0, unit: 'red', hasMoved: false },
-  { col: 4, row: 0, unit: 'red', hasMoved: false },
-  { col: 5, row: 0, unit: 'red', hasMoved: false },
+  { col: 2, row: 0, unit: 'red', movesLeft: 2 },
+  { col: 3, row: 0, unit: 'red', movesLeft: 2 },
+  { col: 4, row: 0, unit: 'red', movesLeft: 2 },
+  { col: 5, row: 0, unit: 'red', movesLeft: 2 },
 ];
 
 export const ZoneOfControlDemo: React.FC = () => {
@@ -165,8 +165,8 @@ export const ZoneOfControlDemo: React.FC = () => {
     const newLog = [...gameState.gameLog];
     newLog.push(`${nextPlayer === 'blue' ? '🔵 Blue' : '🔴 Red'} turn`);
 
-    // Reset hasMoved for all units
-    const resetHexes = gameState.hexes.map(h => ({ ...h, hasMoved: false }));
+    // Reset movesLeft for all units
+    const resetHexes = gameState.hexes.map(h => ({ ...h, movesLeft: 2 }));
 
     setGameState(prev => ({
       ...prev,
@@ -183,10 +183,10 @@ export const ZoneOfControlDemo: React.FC = () => {
 
     const clickedUnit = getUnitAt(col, row);
 
-    // Select own unit that hasn't moved
+    // Select own unit that has moves left
     if (clickedUnit?.unit === gameState.currentPlayer) {
-      if (clickedUnit.hasMoved) {
-        return; // Can't select units that already moved
+      if (clickedUnit.movesLeft <= 0) {
+        return; // Can't select units with no moves
       }
       setGameState(prev => ({
         ...prev,
@@ -200,7 +200,7 @@ export const ZoneOfControlDemo: React.FC = () => {
       const { col: fromCol, row: fromRow } = gameState.selectedUnit;
       const movingUnit = getUnitAt(fromCol, fromRow);
 
-      if (!movingUnit || movingUnit.hasMoved) return;
+      if (!movingUnit || movingUnit.movesLeft <= 0) return;
 
       if (isValidMove(fromCol, fromRow, col, row)) {
         const targetUnit = getUnitAt(col, row);
@@ -217,7 +217,7 @@ export const ZoneOfControlDemo: React.FC = () => {
 
           if (adjacentFriendlies >= 1) { // Moving unit + 1 already there = 2 total
             newHexes = newHexes.filter(h => !(h.col === col && h.row === row));
-            newHexes.push({ col, row, unit: gameState.currentPlayer, hasMoved: true });
+            newHexes.push({ col, row, unit: gameState.currentPlayer, movesLeft: 0 });
             newLog.push(`${gameState.currentPlayer === 'blue' ? '🔵' : '🔴'} eliminated enemy! (2+ units)`);
             turnEnded = true; // Attacking ends turn
           } else {
@@ -229,12 +229,13 @@ export const ZoneOfControlDemo: React.FC = () => {
             return;
           }
         } else {
-          // Normal move
-          newHexes.push({ col, row, unit: gameState.currentPlayer, hasMoved: true });
+          // Normal move - ZOC stops movement!
+          const newMovesLeft = inZOC ? 0 : movingUnit.movesLeft - 1;
+          newHexes.push({ col, row, unit: gameState.currentPlayer, movesLeft: newMovesLeft });
           if (inZOC) {
-            newLog.push(`${gameState.currentPlayer === 'blue' ? '🔵' : '🔴'} entered ZOC!`);
+            newLog.push(`${gameState.currentPlayer === 'blue' ? '🔵' : '🔴'} entered ZOC - STOPPED!`);
           } else {
-            newLog.push(`${gameState.currentPlayer === 'blue' ? '🔵' : '🔴'} moved`);
+            newLog.push(`${gameState.currentPlayer === 'blue' ? '🔵' : '🔴'} moved (${newMovesLeft} left)`);
           }
         }
 
@@ -259,7 +260,7 @@ export const ZoneOfControlDemo: React.FC = () => {
         if (turnEnded) {
           // Auto end turn after combat
           const nextPlayer = gameState.currentPlayer === 'blue' ? 'red' : 'blue';
-          const resetHexes = newHexes.map(h => ({ ...h, hasMoved: false }));
+          const resetHexes = newHexes.map(h => ({ ...h, movesLeft: 2 }));
           newLog.push(`${nextPlayer === 'blue' ? '🔵 Blue' : '🔴 Red'} turn`);
 
           setGameState({
@@ -290,7 +291,7 @@ export const ZoneOfControlDemo: React.FC = () => {
       selectedUnit: null,
       currentPlayer: 'blue',
       turnCount: 1,
-      gameLog: ['🎯 Control the objective!', '🔵 Blue turn: Move units (1 move each)'],
+      gameLog: ['🎯 Control the objective!', '🔵 Blue turn: 2 moves per unit'],
       winner: null,
     });
   };
@@ -314,6 +315,7 @@ export const ZoneOfControlDemo: React.FC = () => {
     const isHovered = hoveredHex?.col === col && hoveredHex?.row === row;
     const isObjective = col === OBJECTIVE.col && row === OBJECTIVE.row;
     const objectiveControl = isObjective && unit ? unit.unit : null;
+    const inZOC = !unit && isInEnemyZOC(col, row, gameState.currentPlayer);
 
     let fillColor = '#1a1a1a';
     if (isObjective && !unit) fillColor = '#2a2a0a';
@@ -345,6 +347,11 @@ export const ZoneOfControlDemo: React.FC = () => {
           opacity={0.9}
         />
 
+        {/* ZOC indicator */}
+        {inZOC && (
+          <circle cx={x} cy={y} r={8} fill="#d4a564" opacity={0.3} />
+        )}
+
         {/* Unit marker */}
         {unit && (
           <g>
@@ -357,7 +364,7 @@ export const ZoneOfControlDemo: React.FC = () => {
               stroke={unit.unit === 'blue' ? '#6abfdf' : '#f47464'}
               strokeWidth={2}
               rx={2}
-              opacity={unit.hasMoved ? 0.5 : 1}
+              opacity={unit.movesLeft === 0 ? 0.4 : 1}
             />
             <text
               x={x}
@@ -370,6 +377,17 @@ export const ZoneOfControlDemo: React.FC = () => {
             >
               {unit.unit === 'blue' ? 'INF' : 'INF'}
             </text>
+            {/* Show moves left */}
+            {unit.movesLeft > 0 && (
+              <circle cx={x + 12} cy={y - 8} r={5} fill="#4a9fb8" opacity={0.8}>
+                <title>{unit.movesLeft} moves left</title>
+              </circle>
+            )}
+            {unit.movesLeft > 0 && (
+              <text x={x + 12} y={y - 6} textAnchor="middle" fill="white" fontSize="7" fontWeight="bold">
+                {unit.movesLeft}
+              </text>
+            )}
           </g>
         )}
 
@@ -389,7 +407,7 @@ export const ZoneOfControlDemo: React.FC = () => {
     <Card className="p-6">
       <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-6">
         <div>
-          <svg width="600" height="500" className="bg-background-tertiary border border-tactical-cyan/20">
+          <svg width="600" height="560" className="bg-background-tertiary border border-tactical-cyan/20">
             {Array.from({ length: MAP_ROWS }, (_, row) =>
               Array.from({ length: MAP_COLS }, (_, col) => renderHex(col, row))
             )}
@@ -428,11 +446,11 @@ export const ZoneOfControlDemo: React.FC = () => {
               Rules
             </div>
             <ul className="text-xs space-y-2 text-muted">
-              <li>• Each unit moves ONCE per turn</li>
-              <li>• <strong className="text-tactical-amber">ZOC: Can't leave enemy zone</strong></li>
+              <li>• Each unit gets <strong className="text-tactical-cyan">2 moves</strong> per turn</li>
+              <li>• <strong className="text-tactical-amber">ZOC: Entering enemy zone STOPS movement</strong></li>
+              <li>• Enemy zones shown with amber dots</li>
               <li>• <strong>Combat: Need 2+ units to kill</strong></li>
               <li>• Attacking ends your turn</li>
-              <li>• Fight for 🎯 - no instant win!</li>
               <li>• <strong className="text-tactical-cyan">Victory:</strong> Eliminate all enemies</li>
             </ul>
           </div>
