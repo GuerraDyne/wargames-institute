@@ -52,6 +52,8 @@ export const ZoneOfControlDemo: React.FC = () => {
     turnCount: 1,
     gameLog: ['🎯 Control the objective!', '🔵 Blue turn: Move units (1 move each)'],
     winner: null,
+    objectiveControl: null,
+    objectiveControlTurns: 0,
   });
 
   const [hoveredHex, setHoveredHex] = useState<{ col: number; row: number } | null>(null);

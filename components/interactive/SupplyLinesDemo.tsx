@@ -62,9 +62,13 @@ export const SupplyLinesDemo: React.FC = () => {
 
   // Offset coordinate to pixel (creates rectangular grid)
   const hexToPixel = (col: number, row: number) => {
-    const offsetX = (row % 2 === 1) ? HEX_SIZE * 3/4 : 0; // Odd rows shift right
-    const x = HEX_SIZE * 3/2 * col + offsetX + 60;
-    const y = HEX_SIZE * Math.sqrt(3) * row + 60;
+    // For flat-top hex: width = sqrt(3) * size, height = 2 * size
+    const hexWidth = Math.sqrt(3) * HEX_SIZE;
+    const hexHeight = 2 * HEX_SIZE;
+
+    const x = col * hexWidth + (row % 2 === 1 ? hexWidth / 2 : 0) + 80;
+    const y = row * hexHeight * 0.75 + 80;
+
     return { x, y };
   };
 
@@ -262,7 +266,7 @@ export const SupplyLinesDemo: React.FC = () => {
     );
 
     const points = Array.from({ length: 6 }, (_, i) => {
-      const angle = (Math.PI / 3) * i; // EXACT copy from working HexGridMap - NO offset
+      const angle = (Math.PI / 3) * i + (Math.PI / 6); // +30° for flat-top
       const px = x + HEX_SIZE * Math.cos(angle);
       const py = y + HEX_SIZE * Math.sin(angle);
       return `${px},${py}`;
