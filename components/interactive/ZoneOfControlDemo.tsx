@@ -56,10 +56,10 @@ export const ZoneOfControlDemo: React.FC = () => {
 
   const [hoveredHex, setHoveredHex] = useState<{ q: number; r: number } | null>(null);
 
-  // Axial to pixel conversion (flat-top hexagons)
+  // Axial to pixel conversion (EXACT copy from working HexGridMap)
   const hexToPixel = (q: number, r: number) => {
-    const x = HEX_SIZE * (3 / 2 * q) + 60;
-    const y = HEX_SIZE * Math.sqrt(3) * (r + q / 2) + 60;
+    const x = HEX_SIZE * (3/2 * q);
+    const y = HEX_SIZE * (Math.sqrt(3)/2 * q + Math.sqrt(3) * r);
     return { x, y };
   };
 
@@ -181,7 +181,7 @@ export const ZoneOfControlDemo: React.FC = () => {
     const inZOC = isInEnemyZOC(q, r, gameState.currentPlayer);
 
     const points = Array.from({ length: 6 }, (_, i) => {
-      const angle = (Math.PI / 3) * i + Math.PI / 6; // Offset by 30 degrees for flat-top
+      const angle = (Math.PI / 3) * i; // EXACT copy from working HexGridMap - NO offset
       const px = x + HEX_SIZE * Math.cos(angle);
       const py = y + HEX_SIZE * Math.sin(angle);
       return `${px},${py}`;
@@ -262,7 +262,7 @@ export const ZoneOfControlDemo: React.FC = () => {
       <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-6">
         {/* Game board */}
         <div>
-          <svg width="600" height="400" className="bg-background-tertiary border border-tactical-cyan/20">
+          <svg width="600" height="500" className="bg-background-tertiary border border-tactical-cyan/20" viewBox="-50 -50 600 500">
             {Array.from({ length: MAP_HEIGHT }, (_, r) =>
               Array.from({ length: MAP_WIDTH }, (_, q) => renderHex(q, r))
             )}
