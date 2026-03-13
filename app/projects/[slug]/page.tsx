@@ -38,15 +38,15 @@ export default async function ProjectPage({ params }: PageProps) {
       <div className="container mx-auto px-6 relative z-10">
         <div className="max-w-4xl mx-auto">
           <div className="mb-10">
-            <div className="font-mono text-xs uppercase tracking-widest text-tactical-cyan mb-4">{'status' in item ? item.status : 'Project'}</div>
+            <div className="font-mono text-xs uppercase tracking-widest text-tactical-cyan mb-4">{'type' in item ? item.type : 'Project'}</div>
             <h1 className="text-4xl md:text-6xl font-bold mb-4">{item.title}</h1>
             <p className="text-xl text-muted mb-6">{item.summary}</p>
-            {'applications' in item && item.applications?.length ? (
+            {'tags' in item && item.tags?.length ? (
               <ul className="space-y-2 text-sm text-muted mb-6">
-                {item.applications.map((application) => (
-                  <li key={application} className="flex items-start">
+                {item.tags.map((tag) => (
+                  <li key={tag} className="flex items-start">
                     <span className="text-tactical-amber mr-2">•</span>
-                    <span>{application}</span>
+                    <span>{tag}</span>
                   </li>
                 ))}
               </ul>
