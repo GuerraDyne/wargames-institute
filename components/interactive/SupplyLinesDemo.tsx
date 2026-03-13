@@ -60,23 +60,40 @@ export const SupplyLinesDemo: React.FC = () => {
 
   const [hoveredHex, setHoveredHex] = useState<{ q: number; r: number } | null>(null);
 
-  // Axial to pixel conversion (EXACT copy from working HexGridMap)
-  const hexToPixel = (q: number, r: number) => {
-    const x = HEX_SIZE * (3/2 * q);
-    const y = HEX_SIZE * (Math.sqrt(3)/2 * q + Math.sqrt(3) * r);
+  // Offset coordinate to pixel (creates rectangular grid)
+  const hexToPixel = (col: number, row: number) => {
+    const offsetX = (row % 2 === 1) ? HEX_SIZE * 3/4 : 0; // Odd rows shift right
+    const x = HEX_SIZE * 3/2 * col + offsetX + 60;
+    const y = HEX_SIZE * Math.sqrt(3) * row + 60;
     return { x, y };
   };
 
-  // Get all adjacent hexes
+  // Get all adjacent hexes (6 neighbors) - adjusted for odd-r offset
   const getNeighbors = (q: number, r: number) => {
-    return [
-      { q: q + 1, r: r },
-      { q: q - 1, r: r },
-      { q: q, r: r + 1 },
-      { q: q, r: r - 1 },
-      { q: q + 1, r: r - 1 },
-      { q: q - 1, r: r + 1 },
-    ].filter(hex => hex.q >= 0 && hex.q < MAP_WIDTH && hex.r >= 0 && hex.r < MAP_HEIGHT);
+    const isOddRow = r % 2 === 1;
+    let neighbors;
+
+    if (isOddRow) {
+      neighbors = [
+        { q: q + 1, r: r },     // E
+        { q: q - 1, r: r },     // W
+        { q: q + 1, r: r - 1 }, // NE
+        { q: q, r: r - 1 },     // NW
+        { q: q + 1, r: r + 1 }, // SE
+        { q: q, r: r + 1 },     // SW
+      ];
+    } else {
+      neighbors = [
+        { q: q + 1, r: r },     // E
+        { q: q - 1, r: r },     // W
+        { q: q, r: r - 1 },     // NE
+        { q: q - 1, r: r - 1 }, // NW
+        { q: q, r: r + 1 },     // SE
+        { q: q - 1, r: r + 1 }, // SW
+      ];
+    }
+
+    return neighbors.filter(hex => hex.q >= 0 && hex.q < MAP_WIDTH && hex.r >= 0 && hex.r < MAP_HEIGHT);
   };
 
   // Get hex data
@@ -338,7 +355,7 @@ export const SupplyLinesDemo: React.FC = () => {
       <div className="grid grid-cols-1 lg:grid-cols-[1fr_300px] gap-6">
         {/* Game board */}
         <div>
-          <svg width="650" height="300" className="bg-background-tertiary border border-tactical-cyan/20" viewBox="-50 -50 650 300">
+          <svg width="650" height="300" className="bg-background-tertiary border border-tactical-cyan/20">
             {Array.from({ length: MAP_HEIGHT }, (_, r) =>
               Array.from({ length: MAP_WIDTH }, (_, q) => renderHex(q, r))
             )}
