@@ -46,7 +46,7 @@ export const MissionStatement: React.FC = () => {
                   Whether you're playing <span className="text-foreground font-semibold">Twilight Struggle</span>, <span className="text-foreground font-semibold">Next War</span>, or <span className="text-foreground font-semibold">Warhammer 40K</span>, every mechanic is teaching something about the problem it's modeling.
                 </p>
                 <p className="text-muted leading-relaxed mt-4">
-                  <span className="text-tactical-amber font-semibold">This site exists to help you understand what those mechanics are doing and why they matter.</span>
+                  <span className="text-tactical-amber font-semibold">Wargames Institute exists to help you understand what those mechanics are doing and why they matter.</span>
                 </p>
               </div>
             </div>
@@ -102,7 +102,7 @@ export const MissionStatement: React.FC = () => {
             <div className="inline-block bg-background-tertiary border border-tactical-cyan/20 px-8 py-6">
               <p className="text-sm text-muted mb-2">COMMUNITY FOCUS</p>
               <p className="text-base max-w-2xl">
-                All content is free and publicly available. We're building a comprehensive resource for wargamers who want to learn complex games, understand mechanics, and use wargames to explore real-world questions.
+                Building a comprehensive resource for wargamers who want to learn complex games, understand mechanics, and use wargames to explore real-world questions. Core content is publicly accessible, with advanced courses and research available through membership.
               </p>
             </div>
           </motion.div>
