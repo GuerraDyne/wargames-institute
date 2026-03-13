@@ -1,0 +1,214 @@
+@import "tailwindcss";
+
+:root {
+  /* Tactical Background Colors */
+  --background: #0a0a0a;
+  --background-secondary: #111111;
+  --background-tertiary: #1a1a1a;
+
+  /* Text Colors */
+  --foreground: #e8e8e8;
+  --foreground-muted: #a0a0a0;
+
+  /* Tactical Accent Colors - Futuristic */
+  --tactical-blue: #3d5a80;
+  --tactical-cyan: #4a9fb8;
+  --tactical-cyan-bright: #00d9ff;
+  --tactical-amber: #d4a564;
+  --tactical-amber-dark: #b8860b;
+
+  /* Grid and Border Colors */
+  --grid-line: rgba(74, 159, 184, 0.15);
+  --border-primary: rgba(61, 90, 128, 0.5);
+  --border-highlight: rgba(74, 159, 184, 0.8);
+
+  /* Status Colors */
+  --success: #4a7058;
+  --warning: #d4a564;
+  --error: #c84545;
+  --info: #4a9fb8;
+}
+
+@theme inline {
+  /* Background Colors */
+  --color-background: var(--background);
+  --color-background-secondary: var(--background-secondary);
+  --color-background-tertiary: var(--background-tertiary);
+
+  /* Text Colors */
+  --color-foreground: var(--foreground);
+  --color-muted: var(--foreground-muted);
+
+  /* Tactical Colors */
+  --color-tactical-blue: var(--tactical-blue);
+  --color-tactical-cyan: var(--tactical-cyan);
+  --color-tactical-cyan-bright: var(--tactical-cyan-bright);
+  --color-tactical-amber: var(--tactical-amber);
+  --color-tactical-amber-dark: var(--tactical-amber-dark);
+
+  /* Border Colors */
+  --color-border: var(--border-primary);
+  --color-border-highlight: var(--border-highlight);
+
+  /* Status Colors */
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-error: var(--error);
+  --color-info: var(--info);
+
+  /* Fonts */
+  --font-sans: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  --font-mono: "JetBrains Mono", "SFMono-Regular", "Consolas", monospace;
+
+  /* Spacing & Sizing */
+  --spacing-tactical: 0.25rem;
+  --border-radius-tactical: 0.25rem;
+
+  /* Transitions */
+  --transition-tactical: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+body {
+  background:
+    radial-gradient(circle at top, rgba(27, 53, 66, 0.22), transparent 34%),
+    linear-gradient(180deg, #081018 0%, #0a0a0a 48%, #070a0d 100%);
+  color: var(--foreground);
+  font-family: var(--font-sans);
+  font-feature-settings: 'kern' 1, 'liga' 1;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(rgba(74, 159, 184, 0.045) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(74, 159, 184, 0.045) 1px, transparent 1px);
+  background-size: 80px 80px;
+  mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.7), transparent 88%);
+  opacity: 0.35;
+}
+
+/* Tactical Grid Background Pattern */
+.tactical-grid {
+  background-image:
+    linear-gradient(var(--grid-line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+  background-size: 50px 50px;
+}
+
+/* Hex Grid Pattern (for more complex tactical displays) */
+.hex-grid {
+  background-image: url("data:image/svg+xml,%3Csvg width='50' height='43.4' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M25 0L47.63 12.5v25L25 50 2.37 37.5v-25z' fill='none' stroke='rgba(74, 159, 184, 0.15)' stroke-width='1'/%3E%3C/svg%3E");
+  background-size: 50px 43.4px;
+}
+
+.tactical-contours {
+  background-image:
+    radial-gradient(circle at 15% 22%, rgba(74, 159, 184, 0.12), transparent 18%),
+    radial-gradient(circle at 78% 24%, rgba(74, 159, 184, 0.08), transparent 20%),
+    radial-gradient(circle at 62% 76%, rgba(212, 165, 100, 0.08), transparent 18%),
+    radial-gradient(circle at 28% 74%, rgba(74, 159, 184, 0.06), transparent 20%);
+}
+
+.tactical-map-surface {
+  background:
+    linear-gradient(135deg, rgba(8, 12, 17, 0.92), rgba(10, 10, 10, 0.75)),
+    radial-gradient(circle at top left, rgba(74, 159, 184, 0.14), transparent 28%),
+    radial-gradient(circle at bottom right, rgba(212, 165, 100, 0.08), transparent 24%);
+}
+
+.tactical-vignette {
+  background:
+    radial-gradient(circle at center, transparent 42%, rgba(5, 8, 10, 0.4) 100%);
+}
+
+.tactical-map-fade {
+  background:
+    linear-gradient(90deg, rgba(6, 8, 11, 0.18), rgba(6, 8, 11, 0.02) 10%, rgba(6, 8, 11, 0.02) 90%, rgba(6, 8, 11, 0.18)),
+    linear-gradient(180deg, rgba(6, 8, 11, 0.08), rgba(6, 8, 11, 0) 22%, rgba(6, 8, 11, 0.18) 100%);
+}
+
+.tactical-frame {
+  box-shadow:
+    inset 0 0 0 1px rgba(74, 159, 184, 0.08),
+    0 0 80px rgba(74, 159, 184, 0.08);
+}
+
+/* Tactical Divider */
+.tactical-divider {
+  height: 1px;
+  background: linear-gradient(to right, transparent, var(--border-highlight), transparent);
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--background-secondary);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--tactical-blue);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--tactical-cyan);
+}
+
+/* Selection */
+::selection {
+  background-color: var(--tactical-cyan);
+  color: var(--background);
+}
+
+/* Glitch Effect Keyframes */
+@keyframes glitch {
+  0%, 100% {
+    transform: translate(0);
+    opacity: 1;
+  }
+  20% {
+    transform: translate(-2px, 2px);
+    opacity: 0.8;
+  }
+  40% {
+    transform: translate(2px, -2px);
+    opacity: 0.9;
+  }
+  60% {
+    transform: translate(-1px, 1px);
+    opacity: 0.85;
+  }
+  80% {
+    transform: translate(1px, -1px);
+    opacity: 0.95;
+  }
+}
+
+/* Grid Fade-in Animation */
+@keyframes gridFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Tactical Glow Effect */
+@keyframes tacticalGlow {
+  0%, 100% {
+    box-shadow: 0 0 5px var(--tactical-cyan);
+  }
+  50% {
+    box-shadow: 0 0 20px var(--tactical-cyan-bright), 0 0 30px var(--tactical-cyan);
+  }
+}
