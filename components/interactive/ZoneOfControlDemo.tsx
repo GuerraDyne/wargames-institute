@@ -56,11 +56,12 @@ export const ZoneOfControlDemo: React.FC = () => {
 
   // Flat-top hex with odd-r offset coordinates
   const hexToPixel = (col: number, row: number) => {
-    const hexWidth = HEX_SIZE * 2;
-    const hexHeight = HEX_SIZE * Math.sqrt(3);
+    // For flat-top hex: width = sqrt(3) * size, height = 2 * size
+    const hexWidth = Math.sqrt(3) * HEX_SIZE;
+    const hexHeight = 2 * HEX_SIZE;
 
-    const x = col * hexWidth * 0.75 + (row % 2 === 1 ? hexWidth * 0.375 : 0) + 80;
-    const y = row * hexHeight + 80;
+    const x = col * hexWidth + (row % 2 === 1 ? hexWidth / 2 : 0) + 80;
+    const y = row * hexHeight * 0.75 + 80;
 
     return { x, y };
   };
