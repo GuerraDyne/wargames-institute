@@ -20,7 +20,7 @@ export default function AboutPage() {
               About the Institute
             </div>
             <h1 className="text-4xl md:text-6xl font-bold mb-6">
-              Turning Complex Problems Into <span className="text-tactical-cyan">Playable Systems</span>
+              Master <span className="text-tactical-cyan">Strategic Thinking</span> Through Wargames
             </h1>
             <p className="text-xl text-muted">
               A research and education platform dedicated to the study and application of model abstraction through simulations and strategic games.

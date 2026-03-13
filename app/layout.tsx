@@ -4,7 +4,7 @@ import { AppShell } from "@/components/layout";
 
 export const metadata: Metadata = {
   title: "Wargames.Institute | Strategic Simulation & Model Abstraction",
-  description: "A research and education platform dedicated to using wargames and simulations to understand complex systems and train strategic thinking.",
+  description: "Master strategic thinking through wargames. Learn decision-making, understand complex systems, and sharpen your ability to analyze problems by making them playable.",
   keywords: ["wargames", "simulations", "strategic thinking", "model abstraction", "systems thinking", "decision science"],
   authors: [{ name: "Wargames.Institute" }],
   viewport: {
@@ -14,7 +14,7 @@ export const metadata: Metadata = {
   },
   openGraph: {
     title: "Wargames.Institute",
-    description: "Turning complex problems into playable systems through strategic simulation.",
+    description: "Master strategic thinking through wargames. Sharpen decision-making and understand complex systems by making them playable.",
     type: "website",
   },
 };

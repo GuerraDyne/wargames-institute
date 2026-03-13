@@ -27,15 +27,13 @@ export const Footer: React.FC = () => {
         { label: 'Case Studies', href: '/case-studies' },
         { label: 'Library', href: '/resources' },
         { label: 'Blog', href: '/blog' },
-        { label: 'Contact', href: '/contact' },
       ],
     },
     {
       title: 'Connect',
       links: [
-        { label: 'Email', href: 'mailto:contact@wargames.institute' },
-        { label: 'Studio', href: '/studio' },
         { label: 'Contact', href: '/contact' },
+        { label: 'Email', href: 'mailto:contact@wargames.institute' },
       ],
     },
   ];
