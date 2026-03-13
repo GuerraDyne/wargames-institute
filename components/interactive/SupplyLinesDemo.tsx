@@ -19,6 +19,8 @@ interface GameState {
   currentPlayer: Player;
   turnCount: number;
   gameLog: string[];
+  redUnitsLost: number;
+  blueUnitsLost: number;
 }
 
 const HEX_SIZE = 30;
@@ -42,27 +44,27 @@ const createFullGrid = (): Hex[] => {
   return hexes;
 };
 
-// Initial setup: Supply line scenario
+// Initial setup: Red must cut Blue's supply before attacking
 const INITIAL_HEXES = (() => {
   const hexes = createFullGrid();
 
   // Blue supply source (left edge)
   hexes.find(h => h.col === 0 && h.row === 3)!.isSupplySource = true;
 
-  // Blue supply line units (connected path to front)
+  // Blue supply line units (creates path to front)
   hexes.find(h => h.col === 2 && h.row === 3)!.unit = 'blue';
   hexes.find(h => h.col === 4 && h.row === 3)!.unit = 'blue';
   hexes.find(h => h.col === 6 && h.row === 3)!.unit = 'blue';
 
-  // Blue front line units (need supply)
-  hexes.find(h => h.col === 8 && h.row === 3)!.unit = 'blue';
+  // Blue front line units (right edge - the target)
   hexes.find(h => h.col === 9 && h.row === 3)!.unit = 'blue';
+  hexes.find(h => h.col === 10 && h.row === 3)!.unit = 'blue';
 
-  // Red units (can move to cut supply line)
-  hexes.find(h => h.col === 4 && h.row === 1)!.unit = 'red';
+  // Red attackers (must cut supply first or die attacking)
   hexes.find(h => h.col === 5 && h.row === 1)!.unit = 'red';
-  hexes.find(h => h.col === 4 && h.row === 5)!.unit = 'red';
+  hexes.find(h => h.col === 6 && h.row === 1)!.unit = 'red';
   hexes.find(h => h.col === 5 && h.row === 5)!.unit = 'red';
+  hexes.find(h => h.col === 6 && h.row === 5)!.unit = 'red';
 
   return hexes;
 })();
@@ -73,7 +75,9 @@ export const SupplyLinesDemo: React.FC = () => {
     selectedUnit: null,
     currentPlayer: 'red',
     turnCount: 1,
-    gameLog: ['🔴 Red: Move to cut Blue\'s supply line!', '🔵 Blue: Protect your supply route!'],
+    gameLog: ['🔴 Red: Cut Blue\'s supply FIRST, then attack!', '⚠️ Attacking supplied Blue units = suicide'],
+    redUnitsLost: 0,
+    blueUnitsLost: 0,
   });
 
   const [hoveredHex, setHoveredHex] = useState<{ col: number; row: number } | null>(null);
@@ -93,19 +97,19 @@ export const SupplyLinesDemo: React.FC = () => {
   const getAdjacentHexes = (col: number, row: number) => {
     const isOddRow = row % 2 === 1;
     const neighbors = isOddRow ? [
-      { col: col, row: row - 1 },     // Top
-      { col: col, row: row + 1 },     // Bottom
-      { col: col - 1, row: row },     // Left
-      { col: col + 1, row: row },     // Right
-      { col: col + 1, row: row - 1 }, // Top-right
-      { col: col + 1, row: row + 1 }, // Bottom-right
+      { col: col, row: row - 1 },
+      { col: col, row: row + 1 },
+      { col: col - 1, row: row },
+      { col: col + 1, row: row },
+      { col: col + 1, row: row - 1 },
+      { col: col + 1, row: row + 1 },
     ] : [
-      { col: col, row: row - 1 },     // Top
-      { col: col, row: row + 1 },     // Bottom
-      { col: col - 1, row: row },     // Left
-      { col: col + 1, row: row },     // Right
-      { col: col - 1, row: row - 1 }, // Top-left
-      { col: col - 1, row: row + 1 }, // Bottom-left
+      { col: col, row: row - 1 },
+      { col: col, row: row + 1 },
+      { col: col - 1, row: row },
+      { col: col + 1, row: row },
+      { col: col - 1, row: row - 1 },
+      { col: col - 1, row: row + 1 },
     ];
 
     const unique = neighbors.filter((n, i, arr) =>
@@ -115,6 +119,16 @@ export const SupplyLinesDemo: React.FC = () => {
     return unique.filter(n =>
       n.col >= 0 && n.col < MAP_COLS && n.row >= 0 && n.row < MAP_ROWS
     );
+  };
+
+  // Check if hex is in enemy ZOC
+  const isInEnemyZOC = (col: number, row: number, player: Player, hexArray: Hex[]): boolean => {
+    if (!player) return false;
+    const neighbors = getAdjacentHexes(col, row);
+    return neighbors.some(n => {
+      const hex = hexArray.find(h => h.col === n.col && h.row === n.row);
+      return hex?.unit && hex.unit !== player;
+    });
   };
 
   // BFS to find supply path
@@ -153,7 +167,17 @@ export const SupplyLinesDemo: React.FC = () => {
       }
     }
 
-    return null; // No supply path found
+    return null;
+  };
+
+  // Check if Blue unit is in supply
+  const isBlueInSupply = (col: number, row: number, hexArray: Hex[]): boolean => {
+    const hex = hexArray.find(h => h.col === col && h.row === row);
+    if (!hex || hex.unit !== 'blue') return false;
+    if (hex.isSupplySource) return true;
+
+    const path = findSupplyPath(col, row, hexArray);
+    return path !== null;
   };
 
   // Calculate supply paths for all Blue units
@@ -180,8 +204,7 @@ export const SupplyLinesDemo: React.FC = () => {
 
     const destHex = hexArray.find(h => h.col === toCol && h.row === toRow);
     if (!destHex) return false;
-    if (destHex.unit) return false; // Can't move into occupied hex
-    if (destHex.isSupplySource) return false; // Can't move into supply source
+    if (destHex.isSupplySource) return false;
 
     return true;
   };
@@ -210,19 +233,90 @@ export const SupplyLinesDemo: React.FC = () => {
         return;
       }
 
-      if (isValidMove(fromCol, fromRow, col, row, gameState.hexes)) {
+      // Check if moving into enemy unit (attack!)
+      if (clickedHex.unit && clickedHex.unit !== gameState.currentPlayer) {
+        const neighbors = getAdjacentHexes(fromCol, fromRow);
+        const isAdjacent = neighbors.some(n => n.col === col && n.row === row);
+
+        if (!isAdjacent) return;
+
+        const newLog = [...gameState.gameLog];
+        let newHexes = [...gameState.hexes];
+        let newRedLost = gameState.redUnitsLost;
+        let newBlueLost = gameState.blueUnitsLost;
+
+        // Red attacking Blue
+        if (gameState.currentPlayer === 'red' && clickedHex.unit === 'blue') {
+          const blueInSupply = isBlueInSupply(col, row, gameState.hexes);
+
+          if (blueInSupply) {
+            // Blue is in supply - DESTROYS Red attacker!
+            newLog.push('💀 Red attacked IN-SUPPLY Blue → Red ELIMINATED!');
+            newLog.push('⚠️ Must cut supply FIRST!');
+            newHexes = newHexes.map(h =>
+              h.col === fromCol && h.row === fromRow ? { ...h, unit: null } : h
+            );
+            newRedLost++;
+          } else {
+            // Blue is out of supply - Red wins!
+            newLog.push('✓ Red destroyed OUT-OF-SUPPLY Blue!');
+            newHexes = newHexes.map(h => {
+              if (h.col === col && h.row === row) return { ...h, unit: null };
+              if (h.col === fromCol && h.row === fromRow) return { ...h, unit: null };
+              return h;
+            });
+            newHexes.find(h => h.col === col && h.row === row)!.unit = 'red';
+            newHexes.find(h => h.col === col && h.row === row)!.movesLeft = movingUnit.movesLeft - 1;
+            newBlueLost++;
+          }
+        }
+
+        const shouldAutoEnd = shouldAutoEndTurn(newHexes, gameState.currentPlayer);
+
+        setGameState({
+          hexes: newHexes,
+          selectedUnit: null,
+          currentPlayer: shouldAutoEnd ? 'blue' : gameState.currentPlayer,
+          turnCount: shouldAutoEnd ? gameState.turnCount + 1 : gameState.turnCount,
+          gameLog: newLog.slice(-6),
+          redUnitsLost: newRedLost,
+          blueUnitsLost: newBlueLost,
+        });
+
+        if (shouldAutoEnd) {
+          setTimeout(() => {
+            setGameState(prev => ({
+              ...prev,
+              hexes: prev.hexes.map(h => ({ ...h, movesLeft: 2 })),
+            }));
+          }, 100);
+        }
+
+        return;
+      }
+
+      // Normal movement
+      if (!clickedHex.unit && isValidMove(fromCol, fromRow, col, row, gameState.hexes)) {
         const newHexes = gameState.hexes.map(h => {
           if (h.col === fromCol && h.row === fromRow) {
             return { ...h, unit: null };
           }
           if (h.col === col && h.row === row) {
-            return { ...h, unit: gameState.currentPlayer, movesLeft: movingUnit.movesLeft - 1 };
+            const inZOC = isInEnemyZOC(col, row, gameState.currentPlayer, gameState.hexes);
+            return {
+              ...h,
+              unit: gameState.currentPlayer,
+              movesLeft: inZOC ? 0 : movingUnit.movesLeft - 1
+            };
           }
           return h;
         });
 
         const newLog = [...gameState.gameLog];
-        newLog.push(`${gameState.currentPlayer === 'blue' ? '🔵' : '🔴'} Moved to (${col},${row})`);
+        const movedIntoZOC = isInEnemyZOC(col, row, gameState.currentPlayer, gameState.hexes);
+        if (movedIntoZOC) {
+          newLog.push(`🔴 Entered enemy ZOC - movement stopped`);
+        }
 
         // Calculate new supply status
         const paths = calculateSupplyPaths(newHexes);
@@ -230,21 +324,21 @@ export const SupplyLinesDemo: React.FC = () => {
         const totalBlueUnits = newHexes.filter(h => h.unit === 'blue').length;
 
         if (blueUnitsInSupply < totalBlueUnits) {
-          newLog.push(`⚠️ ${totalBlueUnits - blueUnitsInSupply} Blue unit(s) OUT OF SUPPLY!`);
+          newLog.push(`⚠️ Supply cut! ${totalBlueUnits - blueUnitsInSupply} Blue OUT OF SUPPLY!`);
         }
 
-        // Check if should auto-end turn
         const shouldAutoEnd = shouldAutoEndTurn(newHexes, gameState.currentPlayer);
 
         setGameState({
           hexes: newHexes,
           selectedUnit: null,
           currentPlayer: shouldAutoEnd ? (gameState.currentPlayer === 'blue' ? 'red' : 'blue') : gameState.currentPlayer,
-          turnCount: shouldAutoEnd && gameState.currentPlayer === 'red' ? gameState.turnCount + 1 : gameState.turnCount,
+          turnCount: shouldAutoEnd && gameState.currentPlayer === 'blue' ? gameState.turnCount + 1 : gameState.turnCount,
           gameLog: newLog.slice(-6),
+          redUnitsLost: gameState.redUnitsLost,
+          blueUnitsLost: gameState.blueUnitsLost,
         });
 
-        // If auto-ending turn, reset moves
         if (shouldAutoEnd) {
           setTimeout(() => {
             setGameState(prev => ({
@@ -268,7 +362,9 @@ export const SupplyLinesDemo: React.FC = () => {
       selectedUnit: null,
       currentPlayer: 'red',
       turnCount: 1,
-      gameLog: ['🔴 Red: Move to cut Blue\'s supply line!', '🔵 Blue: Protect your supply route!'],
+      gameLog: ['🔴 Red: Cut Blue\'s supply FIRST, then attack!', '⚠️ Attacking supplied Blue units = suicide'],
+      redUnitsLost: 0,
+      blueUnitsLost: 0,
     });
   };
 
@@ -276,6 +372,11 @@ export const SupplyLinesDemo: React.FC = () => {
   const supplyPaths = calculateSupplyPaths(gameState.hexes);
   const blueUnitsInSupply = supplyPaths.length;
   const totalBlueUnits = gameState.hexes.filter(h => h.unit === 'blue').length;
+
+  // Check game over
+  const redUnits = gameState.hexes.filter(h => h.unit === 'red').length;
+  const blueUnits = gameState.hexes.filter(h => h.unit === 'blue').length;
+  const gameOver = redUnits === 0 || blueUnits === 0;
 
   // Render hexagon
   const renderHex = (col: number, row: number) => {
@@ -292,12 +393,13 @@ export const SupplyLinesDemo: React.FC = () => {
     );
 
     // Check if this Blue unit is out of supply
-    const isUnitOutOfSupply = hex.unit === 'blue' && !hex.isSupplySource && !supplyPaths.some(path =>
-      path[0].col === col && path[0].row === row
-    );
+    const isUnitOutOfSupply = hex.unit === 'blue' && !hex.isSupplySource && !isBlueInSupply(col, row, gameState.hexes);
+
+    // Check if in enemy ZOC
+    const inZOC = !hex.unit && isInEnemyZOC(col, row, gameState.currentPlayer, gameState.hexes);
 
     const points = Array.from({ length: 6 }, (_, i) => {
-      const angle = (Math.PI / 3) * i + (Math.PI / 6); // +30° for flat-top
+      const angle = (Math.PI / 3) * i + (Math.PI / 6);
       const px = x + HEX_SIZE * Math.cos(angle);
       const py = y + HEX_SIZE * Math.sin(angle);
       return `${px},${py}`;
@@ -341,6 +443,11 @@ export const SupplyLinesDemo: React.FC = () => {
           <circle cx={x} cy={y} r={4} fill="#4a9fb8" opacity={0.5} />
         )}
 
+        {/* ZOC indicator */}
+        {inZOC && (
+          <circle cx={x} cy={y} r={8} fill="#d4a564" opacity={0.3} />
+        )}
+
         {/* Unit marker */}
         {hex.unit && (
           <g>
@@ -375,10 +482,10 @@ export const SupplyLinesDemo: React.FC = () => {
             )}
 
             {/* Moves remaining */}
-            {hex.movesLeft < 2 && hex.unit === gameState.currentPlayer && (
+            {hex.movesLeft < 2 && hex.unit === gameState.currentPlayer && !gameOver && (
               <circle cx={x + 12} cy={y - 12} r={6} fill="#2a2a2a" stroke="#4a9fb8" strokeWidth={1} />
             )}
-            {hex.movesLeft < 2 && hex.unit === gameState.currentPlayer && (
+            {hex.movesLeft < 2 && hex.unit === gameState.currentPlayer && !gameOver && (
               <text x={x + 12} y={y - 9} textAnchor="middle" fontSize="8" fill="#4a9fb8" fontFamily="monospace">
                 {hex.movesLeft}
               </text>
@@ -418,7 +525,7 @@ export const SupplyLinesDemo: React.FC = () => {
         <div className="space-y-4">
           <div className="bg-background-secondary p-4 border border-tactical-cyan/20">
             <div className="text-sm font-mono uppercase tracking-wider text-tactical-cyan mb-2">
-              Supply Status
+              Mission Status
             </div>
             <div className="space-y-2 text-sm">
               <div>Turn: {gameState.turnCount}</div>
@@ -426,20 +533,29 @@ export const SupplyLinesDemo: React.FC = () => {
               <div className={blueUnitsInSupply === totalBlueUnits ? 'text-tactical-cyan' : 'text-tactical-amber'}>
                 Blue In Supply: {blueUnitsInSupply}/{totalBlueUnits}
               </div>
+              <div className="text-xs text-muted border-t border-tactical-cyan/20 pt-2 mt-2">
+                Red Lost: {gameState.redUnitsLost} | Blue Lost: {gameState.blueUnitsLost}
+              </div>
             </div>
+            {gameOver && (
+              <div className="mt-3 p-2 bg-tactical-amber/20 border border-tactical-amber">
+                <div className="text-sm font-bold text-tactical-amber">
+                  {redUnits === 0 ? '🔵 BLUE WINS!' : '🔴 RED WINS!'}
+                </div>
+              </div>
+            )}
           </div>
 
           <div className="bg-background-secondary p-4 border border-tactical-amber/20">
             <div className="text-sm font-mono uppercase tracking-wider text-tactical-amber mb-2">
-              Supply Rules
+              Combat Rules
             </div>
             <ul className="text-xs space-y-2 text-muted">
-              <li>• Blue units must trace path to 📦 supply depot</li>
-              <li>• Path cannot go through Red units</li>
-              <li>• Out-of-supply units: dimmed + ⚠️</li>
-              <li>• Cyan dots show active supply routes</li>
-              <li>• 🔴 Red: Cut Blue's supply line!</li>
-              <li>• 🔵 Blue: Keep supply route open!</li>
+              <li>• Red attacks Blue IN SUPPLY → 💀 Red dies!</li>
+              <li>• Red attacks Blue OUT OF SUPPLY → ✓ Blue eliminated</li>
+              <li>• Blue ZOC stops Red movement</li>
+              <li>• Cut supply line FIRST, then attack</li>
+              <li>• Supply = combat strength</li>
             </ul>
           </div>
 
@@ -455,7 +571,7 @@ export const SupplyLinesDemo: React.FC = () => {
           </div>
 
           <div className="bg-background-secondary p-3 text-xs text-muted">
-            <strong className="text-tactical-cyan">What This Teaches:</strong> Supply lines are critical in operational wargames. Units need logistics to fight. Cutting enemy supply (interdiction) is often more decisive than direct combat. This forces players to protect rear areas and creates strategic depth.
+            <strong className="text-tactical-cyan">What This Teaches:</strong> Supply lines make units combat-effective. Attacking well-supplied units is suicide. Cutting enemy supply (interdiction) weakens them for assault. Protecting supply routes is mission-critical.
           </div>
         </div>
       </div>
