@@ -65,9 +65,9 @@ export const projectsQuery = `*[_type == "project"] | order(title asc){
   _id,
   title,
   "slug": slug.current,
-  status,
+  type,
   summary,
-  applications,
+  tags,
   body
 }`;
 
@@ -75,9 +75,9 @@ export const projectBySlugQuery = `*[_type == "project" && slug.current == $slug
   _id,
   title,
   "slug": slug.current,
-  status,
+  type,
   summary,
-  applications,
+  tags,
   body
 }`;
 
@@ -85,10 +85,11 @@ export const caseStudiesQuery = `*[_type == "caseStudy"] | order(title asc){
   _id,
   title,
   "slug": slug.current,
-  clientType,
-  problem,
+  studyType,
+  gameAnalyzed,
+  question,
   approach,
-  outcome,
+  findings,
   body
 }`;
 
@@ -96,10 +97,11 @@ export const caseStudyBySlugQuery = `*[_type == "caseStudy" && slug.current == $
   _id,
   title,
   "slug": slug.current,
-  clientType,
-  problem,
+  studyType,
+  gameAnalyzed,
+  question,
   approach,
-  outcome,
+  findings,
   body
 }`;
 
@@ -124,7 +126,7 @@ export const resourceBySlugQuery = `*[_type == "resource" && slug.current == $sl
 export const educationProgramsQuery = `*[_type == "educationProgram"] | order(title asc){
   _id,
   title,
-  audience,
+  learningPath,
   summary,
-  modules
+  topics
 }`;

@@ -6,13 +6,14 @@ export const educationProgramType = defineType({
   type: 'document',
   fields: [
     defineField({ name: 'title', title: 'Title', type: 'string', validation: Rule => Rule.required() }),
-    defineField({ name: 'audience', title: 'Audience', type: 'string' }),
+    defineField({ name: 'learningPath', title: 'Learning Path', type: 'string', description: 'E.g., "Beginner Series", "Advanced Analysis"' }),
     defineField({ name: 'summary', title: 'Summary', type: 'text', rows: 4, validation: Rule => Rule.required() }),
     defineField({
-      name: 'modules',
-      title: 'Modules',
+      name: 'topics',
+      title: 'Topics',
       type: 'array',
       of: [{ type: 'string' }],
+      description: 'E.g., "Hex grids", "Movement rules", "Combat resolution"'
     }),
     defineField({ name: 'seo', title: 'SEO', type: 'seo' }),
   ],
