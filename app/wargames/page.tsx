@@ -1,6 +1,6 @@
 import { Metadata } from 'next';
 import { GridOverlay, TacticalDivider } from '@/components/ui';
-import { CounterSystemDemo, HexGridMap, StrategicWargame, SystemAbstractionViz } from '@/components/interactive';
+import { CounterSystemDemo, SystemAbstractionViz, ZoneOfControlDemo, CombatResultsTableDemo, SupplyLinesDemo } from '@/components/interactive';
 
 export const metadata: Metadata = {
   title: 'Wargames | Wargames.Institute',
@@ -43,37 +43,59 @@ export default function WargamesPage() {
 
           <TacticalDivider variant="gradient" />
 
-          {/* Strategic Wargame - NEW */}
+          {/* Zone of Control Demo */}
           <section className="mb-16">
             <div className="mb-6">
               <h2 className="text-3xl font-bold mb-2 flex items-center gap-3">
                 <span className="text-tactical-amber">&gt;</span>
-                Strategic Territory Control
+                Zone of Control (ZOC)
               </h2>
               <p className="text-muted mb-3">
-                A demo of action economy, objectives, terrain, and force concentration. You are learning how operational wargames make position and timing matter more than simple attrition.
+                How wargames model front lines and positional control. Units exert control over adjacent hexes, forcing enemies to stop when entering their zone. This creates realistic friction and forces players to screen, flank, or breakthrough.
               </p>
               <div className="bg-background-tertiary border-l-2 border-tactical-cyan p-3 text-sm">
-                <strong className="text-tactical-cyan">Educational Focus:</strong> This demo teaches <strong>objective play, action limits, supply, and combined arms</strong>. It exists to show how a ruleset can make players prioritize decisive ground and sequencing instead of simply chasing fights.
+                <strong className="text-tactical-cyan">Educational Focus:</strong> ZOC teaches <strong>positional play, screening, breakthrough tactics, and why you can't just walk past enemy units</strong>. This is the foundation of tactical movement in hex-based wargames.
               </div>
             </div>
-            <StrategicWargame />
+            <ZoneOfControlDemo />
           </section>
 
           <TacticalDivider variant="gradient" />
 
-          {/* Hex Grid Map */}
+          {/* Combat Results Table Demo */}
           <section className="mb-16">
             <div className="mb-6">
               <h2 className="text-3xl font-bold mb-2 flex items-center gap-3">
                 <span className="text-tactical-amber">&gt;</span>
-                Tactical Hex Skirmish
+                Combat Results Table (CRT)
               </h2>
-              <p className="text-muted">
-                A demo of hex-based maneuver. It teaches adjacency, terrain friction, local force ratios, and how initiative shifts when you spend actions badly.
+              <p className="text-muted mb-3">
+                The classic odds-based combat system used in most traditional wargames. Attack strength vs defense strength creates odds ratios (3:1, 2:1, etc.), terrain shifts the column left, and dice determine the result.
               </p>
+              <div className="bg-background-tertiary border-l-2 border-tactical-cyan p-3 text-sm">
+                <strong className="text-tactical-cyan">Educational Focus:</strong> The CRT teaches <strong>force concentration, combined arms, when to attack vs defend, and how terrain affects combat odds</strong>. This mechanic makes planning and preparation matter more than dice luck.
+              </div>
             </div>
-            <HexGridMap />
+            <CombatResultsTableDemo />
+          </section>
+
+          <TacticalDivider variant="gradient" />
+
+          {/* Supply Lines Demo */}
+          <section className="mb-16">
+            <div className="mb-6">
+              <h2 className="text-3xl font-bold mb-2 flex items-center gap-3">
+                <span className="text-tactical-amber">&gt;</span>
+                Supply Lines & Logistics
+              </h2>
+              <p className="text-muted mb-3">
+                Units must trace a path back to a supply source to remain effective. Cutting enemy supply lines (interdiction) is often more decisive than direct combat. This mechanic creates strategic depth beyond the front line.
+              </p>
+              <div className="bg-background-tertiary border-l-2 border-tactical-cyan p-3 text-sm">
+                <strong className="text-tactical-cyan">Educational Focus:</strong> Supply teaches <strong>logistics, rear-area security, interdiction, and why operational depth matters</strong>. Professional wargames model supply because it's often the limiting factor in real campaigns.
+              </div>
+            </div>
+            <SupplyLinesDemo />
           </section>
 
           <TacticalDivider variant="gradient" />
@@ -110,11 +132,15 @@ export default function WargamesPage() {
                 </li>
                 <li className="flex items-start">
                   <span className="text-tactical-cyan mr-3">•</span>
-                  <span><strong className="text-foreground">Strategic Territory Control:</strong> action economy, reinforcement, objectives, terrain modifiers, and force concentration on a node map.</span>
+                  <span><strong className="text-foreground">Zone of Control (ZOC):</strong> how units exert control over adjacent hexes, creating front lines and forcing movement decisions.</span>
                 </li>
                 <li className="flex items-start">
                   <span className="text-tactical-cyan mr-3">•</span>
-                  <span><strong className="text-foreground">Tactical Hex Skirmish:</strong> hex adjacency, movement costs by terrain, reserve reinforcement, and local superiority at the point of contact.</span>
+                  <span><strong className="text-foreground">Combat Results Table (CRT):</strong> odds-based combat resolution with force ratios, terrain modifiers, and probabilistic outcomes.</span>
+                </li>
+                <li className="flex items-start">
+                  <span className="text-tactical-cyan mr-3">•</span>
+                  <span><strong className="text-foreground">Supply Lines:</strong> logistical constraints, supply tracing, interdiction, and the importance of rear-area security.</span>
                 </li>
                 <li className="flex items-start">
                   <span className="text-tactical-cyan mr-3">•</span>
