@@ -7,6 +7,12 @@ export const sanityClient = createClient({
   apiVersion,
   useCdn,
   stega: false,
+  fetch: (url, options) => {
+    return fetch(url, {
+      ...options,
+      next: { revalidate: 60 }, // Revalidate every 60 seconds
+    });
+  },
 });
 
 export const previewClient = createClient({

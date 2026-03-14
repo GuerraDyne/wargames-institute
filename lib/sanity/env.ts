@@ -9,4 +9,4 @@ export const projectId =
 
 export const readToken = process.env.SANITY_API_READ_TOKEN;
 
-export const useCdn = true;
+export const useCdn = false; // Disable CDN to get fresh content with ISR revalidation
