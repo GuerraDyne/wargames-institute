@@ -113,35 +113,41 @@ export const CombatResultsTableDemo: React.FC = () => {
 
     let newAttackers = [...state.attackers];
     let newDefenders = [...state.defenders];
+    let resultDescription = '';
 
     // Apply combat result
     switch (result) {
       case 'AE':
         newAttackers = [];
+        resultDescription = 'Attacker eliminated! All attacking units destroyed.';
         break;
       case 'AR':
         // Remove one attacker
         if (newAttackers.length > 0) {
           newAttackers = newAttackers.slice(0, -1);
         }
+        resultDescription = 'Attacker retreats! Lost 1 attacking unit.';
         break;
       case 'EX':
         // Both lose one unit
         if (newAttackers.length > 0) newAttackers = newAttackers.slice(0, -1);
         if (newDefenders.length > 0) newDefenders = newDefenders.slice(0, -1);
+        resultDescription = 'Exchange! Both sides lost 1 unit.';
         break;
       case 'DR':
         // Remove one defender
         if (newDefenders.length > 0) {
           newDefenders = newDefenders.slice(0, -1);
         }
+        resultDescription = 'Defender retreats! Defender lost 1 unit.';
         break;
       case 'DE':
         newDefenders = [];
+        resultDescription = 'Defender eliminated! All defending units destroyed.';
         break;
     }
 
-    const logEntry = `🎲 Roll: ${dieRoll} on ${modifiedOdds} → ${RESULT_NAMES[result]}`;
+    const logEntry = `🎲 Rolled ${dieRoll} on ${modifiedOdds} column → ${result}: ${resultDescription}`;
 
     setState({
       ...state,
@@ -305,38 +311,71 @@ export const CombatResultsTableDemo: React.FC = () => {
         {/* Right: Combat Resolution */}
         <div className="space-y-4">
           {/* Odds Display */}
-          <div className="bg-background-secondary p-6 border border-tactical-cyan/20 text-center">
-            <div className="text-xs text-muted mb-2">COMBAT ODDS</div>
-            <div className="text-4xl font-bold text-tactical-cyan mb-2">
+          <div className="bg-background-secondary p-6 border border-tactical-cyan/20">
+            <div className="text-xs text-muted mb-2 text-center">COMBAT ODDS</div>
+            <div className="text-4xl font-bold text-tactical-cyan mb-2 text-center">
               {modifiedOdds}
             </div>
-            {baseOdds !== modifiedOdds && (
-              <div className="text-xs text-tactical-amber">
-                (Base: {baseOdds}, Terrain: {TERRAIN_MODIFIERS[state.terrain].shift})
-              </div>
-            )}
-            <div className="text-xs text-muted mt-2">
+            <div className="text-xs text-muted text-center mb-3">
               {calculateAttackStrength()} ATK vs {calculateDefenseStrength()} DEF
             </div>
+            {baseOdds !== modifiedOdds ? (
+              <div className="bg-background-tertiary p-3 text-xs space-y-1">
+                <div className="flex items-center justify-between">
+                  <span className="text-muted">Base Odds:</span>
+                  <span className="text-foreground font-bold">{baseOdds}</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-muted">Terrain Shift:</span>
+                  <span className="text-tactical-amber font-bold">{TERRAIN_MODIFIERS[state.terrain].shift} columns</span>
+                </div>
+                <div className="border-t border-tactical-cyan/20 pt-1 flex items-center justify-between">
+                  <span className="text-muted">Final Odds:</span>
+                  <span className="text-tactical-cyan font-bold">{modifiedOdds}</span>
+                </div>
+                <div className="text-xs text-tactical-amber pt-2">
+                  ↓ Terrain made the attack harder by shifting odds left {Math.abs(TERRAIN_MODIFIERS[state.terrain].shift)} column{Math.abs(TERRAIN_MODIFIERS[state.terrain].shift) > 1 ? 's' : ''}
+                </div>
+              </div>
+            ) : (
+              <div className="bg-background-tertiary p-3 text-xs text-center text-muted">
+                No terrain modifier - using base odds
+              </div>
+            )}
           </div>
 
           {/* CRT Table */}
           <div className="bg-background-tertiary p-4 border border-tactical-cyan/20">
-            <div className="text-xs font-mono uppercase tracking-wider text-tactical-cyan mb-3">
-              Combat Results Table
+            <div className="text-xs font-mono uppercase tracking-wider text-tactical-cyan mb-2">
+              Combat Results Table ({modifiedOdds} Column)
+            </div>
+            <div className="text-xs text-muted mb-3">
+              Roll 1d6 to determine the outcome on this odds column:
             </div>
             <div className="text-xs space-y-1 font-mono">
-              {Object.entries(CRT_TABLE[modifiedOdds]).map(([die, result]) => (
-                <div
-                  key={die}
-                  className={`flex justify-between p-2 ${
-                    state.lastResult === result ? 'bg-tactical-cyan/20 border border-tactical-cyan' : 'bg-background'
-                  }`}
-                >
-                  <span>Roll {die}:</span>
-                  <span className="text-tactical-amber">{result} - {RESULT_NAMES[result]}</span>
-                </div>
-              ))}
+              {Object.entries(CRT_TABLE[modifiedOdds]).map(([die, result]) => {
+                const isGoodForAttacker = result === 'DR' || result === 'DE';
+                const isBadForAttacker = result === 'AE' || result === 'AR';
+                return (
+                  <div
+                    key={die}
+                    className={`flex justify-between p-2 ${
+                      state.lastResult === result
+                        ? 'bg-tactical-cyan/20 border border-tactical-cyan'
+                        : 'bg-background'
+                    }`}
+                  >
+                    <span className="font-bold">Die Roll {die}:</span>
+                    <span className={
+                      isGoodForAttacker ? 'text-green-400' :
+                      isBadForAttacker ? 'text-red-400' :
+                      'text-tactical-amber'
+                    }>
+                      {result} - {RESULT_NAMES[result]}
+                    </span>
+                  </div>
+                );
+              })}
             </div>
           </div>
 
@@ -366,9 +405,29 @@ export const CombatResultsTableDemo: React.FC = () => {
             </div>
           </div>
 
-          {/* Teaching Note */}
-          <div className="bg-background-tertiary p-3 text-xs text-muted">
-            <strong className="text-tactical-cyan">What This Teaches:</strong> The Combat Results Table (CRT) is how classic wargames resolve combat through odds and dice. Higher force ratios give better odds, but terrain shifts the column left (favoring defenders). This teaches force concentration, combined arms, and when attacking is favorable.
+          {/* Expanded Teaching Section */}
+          <div className="bg-background-tertiary p-4 text-xs space-y-3">
+            <div>
+              <strong className="text-tactical-cyan text-sm">How The CRT Works:</strong>
+            </div>
+
+            <div className="space-y-2 text-muted">
+              <p><strong className="text-foreground">1. Calculate Odds:</strong> Divide attacker strength by defender strength to get a ratio (like 3:1 or 2:1). This determines which column of the table you use.</p>
+
+              <p><strong className="text-foreground">2. Terrain Shifts:</strong> Terrain "shifts" the odds left (toward worse odds for attacker). Forest is -1 column (3:1 becomes 2:1), City is -2 columns (3:1 becomes 1:1). This is why attacking into cities is hard.</p>
+
+              <p><strong className="text-foreground">3. Roll The Die:</strong> Roll 1d6 and look up the result on your odds column. The table shows what happens:</p>
+
+              <ul className="ml-4 space-y-1">
+                <li><strong className="text-tactical-cyan">AE (Attacker Eliminated):</strong> Your attack failed catastrophically - you lose all units</li>
+                <li><strong className="text-tactical-cyan">AR (Attacker Retreats):</strong> Attack failed - you lose 1 unit and must pull back</li>
+                <li><strong className="text-tactical-amber">EX (Exchange):</strong> Bloody fight - both sides lose 1 unit</li>
+                <li><strong className="text-green-400">DR (Defender Retreats):</strong> Success! Defender loses 1 unit and must retreat</li>
+                <li><strong className="text-green-400">DE (Defender Eliminated):</strong> Total victory - defender loses all units</li>
+              </ul>
+
+              <p className="pt-2 border-t border-tactical-cyan/20"><strong className="text-foreground">Key Lesson:</strong> Better odds give better results more consistently, but nothing is guaranteed. A 4:1 attack in open ground is strong. That same attack into a city (becomes 2:1 after -2 shift) is much riskier. This is why concentration of force and terrain matter.</p>
+            </div>
           </div>
         </div>
       </div>

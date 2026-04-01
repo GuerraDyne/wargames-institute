@@ -1,6 +1,6 @@
 import { Metadata } from 'next';
 import { GridOverlay, TacticalDivider } from '@/components/ui';
-import { CounterSystemDemo, SystemAbstractionViz, ZoneOfControlDemo, CombatResultsTableDemo, SupplyLinesDemo } from '@/components/interactive';
+import { CounterSystemDemo, SystemAbstractionViz, CombatResultsTableDemo } from '@/components/interactive';
 
 export const metadata: Metadata = {
   title: 'Wargames | Wargames.Institute',
@@ -43,25 +43,6 @@ export default function WargamesPage() {
 
           <TacticalDivider variant="gradient" />
 
-          {/* Zone of Control Demo */}
-          <section className="mb-16">
-            <div className="mb-6">
-              <h2 className="text-3xl font-bold mb-2 flex items-center gap-3">
-                <span className="text-tactical-amber">&gt;</span>
-                Zone of Control (ZOC)
-              </h2>
-              <p className="text-muted mb-3">
-                How wargames model front lines and positional control. Units exert control over adjacent hexes, forcing enemies to stop when entering their zone. This creates realistic friction and forces players to screen, flank, or breakthrough.
-              </p>
-              <div className="bg-background-tertiary border-l-2 border-tactical-cyan p-3 text-sm">
-                <strong className="text-tactical-cyan">Educational Focus:</strong> ZOC teaches <strong>positional play, screening, breakthrough tactics, and why you can't just walk past enemy units</strong>. This is the foundation of tactical movement in hex-based wargames.
-              </div>
-            </div>
-            <ZoneOfControlDemo />
-          </section>
-
-          <TacticalDivider variant="gradient" />
-
           {/* Combat Results Table Demo */}
           <section className="mb-16">
             <div className="mb-6">
@@ -77,25 +58,6 @@ export default function WargamesPage() {
               </div>
             </div>
             <CombatResultsTableDemo />
-          </section>
-
-          <TacticalDivider variant="gradient" />
-
-          {/* Supply Lines Demo */}
-          <section className="mb-16">
-            <div className="mb-6">
-              <h2 className="text-3xl font-bold mb-2 flex items-center gap-3">
-                <span className="text-tactical-amber">&gt;</span>
-                Supply Lines & Logistics
-              </h2>
-              <p className="text-muted mb-3">
-                Units must trace a path back to a supply source to remain effective. Cutting enemy supply lines (interdiction) is often more decisive than direct combat. This mechanic creates strategic depth beyond the front line.
-              </p>
-              <div className="bg-background-tertiary border-l-2 border-tactical-cyan p-3 text-sm">
-                <strong className="text-tactical-cyan">Educational Focus:</strong> Supply teaches <strong>logistics, rear-area security, interdiction, and why operational depth matters</strong>. Professional wargames model supply because it's often the limiting factor in real campaigns.
-              </div>
-            </div>
-            <SupplyLinesDemo />
           </section>
 
           <TacticalDivider variant="gradient" />
@@ -116,39 +78,31 @@ export default function WargamesPage() {
           {/* Mechanics Summary */}
           <div className="bg-background-secondary border-l-4 border-tactical-cyan p-8 mt-16">
             <h3 className="font-mono text-tactical-cyan uppercase tracking-wider mb-3">
-              Mechanics on Display
+              What These Demos Teach
             </h3>
             <div className="space-y-4 text-muted leading-relaxed">
               <p>
-                These are small teaching demos. They are not full wargames, and they are not meant to claim more than they actually show.
+                These are focused teaching tools, not full wargames. Each one isolates a core concept and makes it visible through interaction.
               </p>
               <p>
-                What each one is demonstrating:
+                What you're learning:
               </p>
               <ul className="space-y-2 ml-6">
                 <li className="flex items-start">
                   <span className="text-tactical-cyan mr-3">•</span>
-                  <span><strong className="text-foreground">Reality to Playable Model:</strong> variable selection, simplification, and the move from messy reality to a rule-bound system.</span>
+                  <span><strong className="text-foreground">Reality to Playable Model:</strong> How complex real-world situations get simplified into playable systems without losing the structure that makes decisions meaningful.</span>
                 </li>
                 <li className="flex items-start">
                   <span className="text-tactical-cyan mr-3">•</span>
-                  <span><strong className="text-foreground">Zone of Control (ZOC):</strong> how units exert control over adjacent hexes, creating front lines and forcing movement decisions.</span>
+                  <span><strong className="text-foreground">Combat Results Table (CRT):</strong> The classic odds-based combat system. Learn why force concentration matters, how terrain affects combat, and when to attack vs defend. This mechanic makes planning and preparation matter more than dice luck.</span>
                 </li>
                 <li className="flex items-start">
                   <span className="text-tactical-cyan mr-3">•</span>
-                  <span><strong className="text-foreground">Combat Results Table (CRT):</strong> odds-based combat resolution with force ratios, terrain modifiers, and probabilistic outcomes.</span>
-                </li>
-                <li className="flex items-start">
-                  <span className="text-tactical-cyan mr-3">•</span>
-                  <span><strong className="text-foreground">Supply Lines:</strong> logistical constraints, supply tracing, interdiction, and the importance of rear-area security.</span>
-                </li>
-                <li className="flex items-start">
-                  <span className="text-tactical-cyan mr-3">•</span>
-                  <span><strong className="text-foreground">Hex and Counter Primer:</strong> how traditional counters encode movement, attack, defense, and battlefield role directly on the piece.</span>
+                  <span><strong className="text-foreground">Hex and Counter Primer:</strong> How traditional wargame counters encode movement, attack strength, defense strength, and battlefield role directly on the piece. This is the information-dense design language of classic wargames.</span>
                 </li>
               </ul>
               <p className="pt-2 border-t border-tactical-cyan/20">
-                The point of this page is to make the underlying mechanics legible. Larger lessons only emerge when those mechanics are embedded in a fuller scenario, ruleset, and adjudication model.
+                These mechanics are building blocks. Real wargames combine them with scenarios, historical context, and adjudication rules to explore specific questions about conflict, strategy, and decision-making under uncertainty.
               </p>
             </div>
           </div>
