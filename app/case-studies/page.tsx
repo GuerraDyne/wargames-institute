@@ -8,6 +8,9 @@ export const metadata: Metadata = {
   description: 'Game analyses, mechanics breakdowns, and research using wargames to explore real-world questions.',
 };
 
+// ISR: Revalidate every 60 seconds
+export const revalidate = 60;
+
 export default async function CaseStudiesPage() {
   const caseStudies = await getCaseStudies();
 

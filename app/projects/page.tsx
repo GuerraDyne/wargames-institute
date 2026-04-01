@@ -8,6 +8,9 @@ export const metadata: Metadata = {
   description: 'Game guides, mechanics breakdowns, and original educational wargames.',
 };
 
+// ISR: Revalidate every 60 seconds
+export const revalidate = 60;
+
 export default async function ProjectsPage() {
   const projectProfiles = await getProjects();
 

@@ -6,12 +6,8 @@ export const sanityClient = createClient({
   dataset,
   apiVersion,
   useCdn,
-  stega: false,
-  fetch: (url, options) => {
-    return fetch(url, {
-      ...options,
-      next: { revalidate: 60 }, // Revalidate every 60 seconds
-    });
+  stega: {
+    studioUrl: '/studio',
   },
 });
 

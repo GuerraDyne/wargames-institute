@@ -8,6 +8,9 @@ export const metadata: Metadata = {
   description: 'Insights on wargaming, strategic thinking, and model abstraction.',
 };
 
+// ISR: Revalidate every 60 seconds
+export const revalidate = 60;
+
 export default async function BlogPage() {
   const articlePreviews = await getArticles();
 

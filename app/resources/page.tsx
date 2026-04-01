@@ -8,6 +8,9 @@ export const metadata: Metadata = {
   description: 'Educational materials, frameworks, and tools for strategic simulation and model abstraction.',
 };
 
+// ISR: Revalidate every 60 seconds
+export const revalidate = 60;
+
 export default async function ResourcesPage() {
   const resourceItems = await getResources();
 
