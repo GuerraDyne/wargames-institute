@@ -63,9 +63,9 @@ export default async function Home() {
             </div>
 
             <div className="text-center">
-              <Link href="/wargames">
+              <Link href="/resources">
                 <Button variant="primary" size="lg">
-                  EXPLORE DEMOS
+                  EXPLORE RESOURCES & DEMOS
                 </Button>
               </Link>
             </div>
