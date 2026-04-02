@@ -137,6 +137,27 @@ export default function AboutPage() {
                 <div className="flex items-start gap-2">
                   <span className="text-tactical-cyan mt-1">▸</span>
                   <div>
+                    <strong className="text-foreground">Infinity (Corvus Belli)</strong>
+                    <p className="text-xs text-muted">Sci-fi skirmish tactics</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-2">
+                  <span className="text-tactical-cyan mt-1">▸</span>
+                  <div>
+                    <strong className="text-foreground">BattleTech</strong>
+                    <p className="text-xs text-muted">Mech combat and force management</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-2">
+                  <span className="text-tactical-cyan mt-1">▸</span>
+                  <div>
+                    <strong className="text-foreground">Blackout Wargame</strong>
+                    <p className="text-xs text-muted">Modern tactical operations</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-2">
+                  <span className="text-tactical-cyan mt-1">▸</span>
+                  <div>
                     <strong className="text-foreground">& Many Others</strong>
                     <p className="text-xs text-muted">Expanding coverage regularly</p>
                   </div>
