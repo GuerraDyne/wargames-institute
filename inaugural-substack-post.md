@@ -42,7 +42,7 @@ Strategy asks different questions:
 - When should I attack? When should I consolidate?
 - Where is the enemy vulnerable? Where am I vulnerable?
 
-These aren't game-specific questions. They apply to Warmachine, Infinity, BattleTech, Next War, Littoral Commander, Blackout, and every other wargame you'll play.
+These aren't game-specific questions. They apply to Warmachine, Infinity, BattleTech, Next War, Littoral Commander, BLKOUT, and every other wargame you'll play.
 
 ## Why This Matters for You
 
@@ -191,7 +191,7 @@ Let's learn to think strategically together.
 
 I served in the United States Marine Corps where I developed a deep interest in strategic theory, operational planning, and military doctrine. After leaving active service, I continued studying strategy through wargaming—using games as systems to explore strategic principles.
 
-Wargames Institute is my platform for teaching strategic thinking through the lens of tabletop wargaming. I cover everything from tactical skirmish games (Warmachine, Infinity, Blackout) to operational simulations (BattleTech, Littoral Commander) to grand strategic games (Next War series, Stalingrad).
+Wargames Institute is my platform for teaching strategic thinking through the lens of tabletop wargaming. I cover everything from tactical skirmish games (Warmachine, Infinity, BLKOUT) to operational simulations (BattleTech, Littoral Commander) to grand strategic games (Next War series, Stalingrad).
 
 I'm not here to chase the meta. I'm here to teach you how to think.
 

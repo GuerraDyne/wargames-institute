@@ -255,7 +255,7 @@
 - What is a culminating point? (when offensive power equals defensive resistance)
 - How to recognize you're approaching culmination
 - The danger of "one more turn" syndrome
-- Examples in Blackout Wargame, Littoral Commander
+- Examples in BLKOUT, Littoral Commander
 - Knowing when to consolidate vs when to press
 - How terrain, fatigue, supply affect culmination in games
 
@@ -348,6 +348,64 @@ After establishing fundamental concepts with Series B, deep-dive into specific g
 
 ---
 
+#### Kill Team: Small Unit Tactics Series (5 parts)
+
+**Part 1: Fire Team Fundamentals - What the Marine Corps Teaches About Squad Combat**
+- Four-man fire team structure and principles
+- Roles: Team Leader, Automatic Rifleman, Grenadier, Rifleman
+- How Kill Team models (or doesn't) real small unit tactics
+- Applying Marine Corps small unit leadership principles
+
+**Part 2: Mission Command in Kill Team - Decentralized Execution**
+- Empowering your operatives to act independently
+- When to micromanage vs when to trust the plan
+- Order selection as mission-type orders
+- Case studies: Letting specialists do their job
+
+**Part 3: Reconnaissance and Security - Before the Fight Starts**
+- Movement to contact principles
+- Using scout operatives effectively
+- Security positions and overwatch
+- Information gathering as a win condition
+
+**Part 4: Fire and Movement - The Buddy Team Concept**
+- Bounding overwatch in Kill Team
+- Suppression and maneuver
+- Using cover and concealment properly
+- Coordinated team actions vs individual heroes
+
+**Part 5: The Urban Fight - Lessons from MOUT Training**
+- Military Operations in Urban Terrain principles
+- Room clearing and building fighting
+- Vertical space and rooftops
+- Kill Team's urban warfare mechanics examined
+
+---
+
+#### BLKOUT: Modern Small Unit Tactics Series (4 parts)
+
+**Part 1: BLKOUT's Speed and Decision-Making Under Pressure**
+- Fast-paced tactical decision-making
+- OODA Loop at tactical speed
+- When to act fast vs when to slow down
+
+**Part 2: Small Team Coordination in BLKOUT**
+- Team communication and coordination
+- Role specialization in small units
+- Supporting your teammates tactically
+
+**Part 3: Urban Combat Tactics in BLKOUT**
+- Movement in urban terrain
+- Using cover and angles effectively
+- Clearing and securing objectives
+
+**Part 4: Strategic Thinking in Fast Tactical Games**
+- How to think strategically even in fast-paced games
+- Making good decisions under time pressure
+- After-action analysis for rapid improvement
+
+---
+
 ### Standalone Article Ideas (Substack)
 
 **Strategic Theory:**
@@ -382,7 +440,7 @@ After establishing fundamental concepts with Series B, deep-dive into specific g
 - "What Littoral Commander Teaches About Taiwan Strait Conflict"
 - "Gray Zone Competition in Matrix Games"
 - "Proxy Wars and Escalation: Lessons from Next War Series"
-- "Urban Warfare Evolution: From Stalingrad to Blackout"
+- "Urban Warfare Evolution: From Stalingrad to BLKOUT"
 - "Multi-Domain Operations in Modern Wargames"
 
 ---
@@ -395,7 +453,8 @@ After establishing fundamental concepts with Series B, deep-dive into specific g
 3. "Your First Hex-and-Counter Game: Next War Edition"
 4. "BattleTech for Beginners: From Mech to Campaign"
 5. "Infinity Tactical Primer: Beyond the Rules"
-6. "Blackout Wargame: Urban Operations Fundamentals"
+6. "Kill Team Strategic Guide: Small Unit Tactics for Wargamers"
+7. "BLKOUT: Fast-Paced Tactical Operations Guide"
 
 **Strategic Framework Guides:**
 1. "The Strategic Planning Framework for Wargamers"

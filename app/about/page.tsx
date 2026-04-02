@@ -151,8 +151,15 @@ export default function AboutPage() {
                 <div className="flex items-start gap-2">
                   <span className="text-tactical-cyan mt-1">▸</span>
                   <div>
-                    <strong className="text-foreground">Blackout Wargame</strong>
-                    <p className="text-xs text-muted">Modern tactical operations</p>
+                    <strong className="text-foreground">BLKOUT</strong>
+                    <p className="text-xs text-muted">Fast-paced small unit tactics</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-2">
+                  <span className="text-tactical-cyan mt-1">▸</span>
+                  <div>
+                    <strong className="text-foreground">Warhammer 40k Kill Team</strong>
+                    <p className="text-xs text-muted">Squad-level skirmish combat</p>
                   </div>
                 </div>
                 <div className="flex items-start gap-2">
