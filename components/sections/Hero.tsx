@@ -85,7 +85,7 @@ export const Hero: React.FC = () => {
               transition={{ duration: 0.6, delay: 0.15 }}
             >
               <div className="font-mono text-[11px] md:text-xs uppercase tracking-[0.28em] text-tactical-amber mb-4">
-                Wargame Education, Mechanics, and Research
+                Strategic Thinking Through Wargames
               </div>
 
               <motion.h1
@@ -109,7 +109,7 @@ export const Hero: React.FC = () => {
                 animate={{ opacity: 1 }}
                 transition={{ duration: 0.6, delay: 0.4 }}
               >
-                Learn how wargames work, how mechanics shape decisions, how to read classic systems, and how playable models can be used to explore real-world problems.
+                Learn how strategic principles manifest on the tabletop. From Marine Corps doctrine to classic wargames, discover how to think strategically—not just chase the meta.
               </motion.p>
 
               <motion.div
@@ -118,14 +118,14 @@ export const Hero: React.FC = () => {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: 0.55 }}
               >
-                <Link href="/research">
+                <Link href="/blog">
                   <Button variant="primary" size="lg">
-                    START LEARNING
+                    READ THE BLOG
                   </Button>
                 </Link>
-                <Link href="/projects">
+                <Link href="/resources">
                   <Button variant="outline" size="lg">
-                    SEE DEMOS
+                    EXPLORE RESOURCES
                   </Button>
                 </Link>
               </motion.div>

@@ -8,11 +8,10 @@ import { motion } from 'framer-motion';
 const navItems = [
   { label: 'Home', href: '/' },
   { label: 'About', href: '/about' },
-  { label: 'Research', href: '/research' },
   { label: 'Education', href: '/education' },
   { label: 'Projects', href: '/projects' },
-  { label: 'Case Studies', href: '/case-studies' },
   { label: 'Resources', href: '/resources' },
+  { label: 'Videos', href: '/videos' },
   { label: 'Blog', href: '/blog' },
   { label: 'Contact', href: '/contact' },
 ];

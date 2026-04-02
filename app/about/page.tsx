@@ -29,23 +29,26 @@ export default function AboutPage() {
 
           <TacticalDivider variant="gradient" />
 
-          {/* Core Mission */}
+          {/* Background & Mission */}
           <section className="mb-16">
             <h2 className="text-3xl font-bold mb-6 flex items-center gap-3">
               <span className="text-tactical-amber">&gt;</span>
-              Core Mission
+              Background & Mission
             </h2>
             <Card variant="briefing" className="mb-8">
               <p className="text-lg leading-relaxed mb-4">
-                Wargames.Institute is a <strong className="text-tactical-cyan">public education project</strong> dedicated to teaching how wargames work, what they model, and why they're valuable tools for thinking and learning.
+                Wargames.Institute was founded by a United States Marine Corps veteran with a deep interest in strategic theory. After years of studying how strategy manifests in both doctrine and practice, I saw wargames as more than just entertainment—they're <strong className="text-tactical-cyan">thinking tools</strong> that teach strategic reasoning, force planning, and decision-making under uncertainty.
+              </p>
+              <p className="text-muted leading-relaxed mb-4">
+                This isn't about meta-chasing or finding the optimal army list. It's about understanding <strong className="text-foreground">how strategic principles manifest on the tabletop</strong>, how rule systems shape decision spaces, and how environmental conditions (different rule sets, scenarios, and game systems) affect the viability of different strategies.
               </p>
               <p className="text-muted leading-relaxed">
-                We focus on helping wargamers ask better questions:
+                The Institute focuses on helping wargamers ask better questions:
               </p>
               <ul className="mt-4 space-y-2 text-muted">
-                <li className="flex items-start"><span className="text-tactical-cyan mr-3">&gt;</span> What is this mechanic actually modeling?</li>
+                <li className="flex items-start"><span className="text-tactical-cyan mr-3">&gt;</span> What strategic principle is this mechanic actually modeling?</li>
                 <li className="flex items-start"><span className="text-tactical-cyan mr-3">&gt;</span> Why did the designer choose this rule over alternatives?</li>
-                <li className="flex items-start"><span className="text-tactical-cyan mr-3">&gt;</span> How can I learn complex games without getting overwhelmed?</li>
+                <li className="flex items-start"><span className="text-tactical-cyan mr-3">&gt;</span> How can I learn to think strategically, not just follow the meta?</li>
                 <li className="flex items-start"><span className="text-tactical-cyan mr-3">&gt;</span> What can wargames teach about real-world strategic problems?</li>
               </ul>
             </Card>
@@ -81,6 +84,65 @@ export default function AboutPage() {
                 </p>
               </Card>
             </div>
+          </section>
+
+          <TacticalDivider variant="dashed" />
+
+          {/* Games We Cover */}
+          <section className="mb-16">
+            <h2 className="text-3xl font-bold mb-6 flex items-center gap-3">
+              <span className="text-tactical-amber">&gt;</span>
+              Games We Cover
+            </h2>
+            <Card hover={false} className="bg-background-secondary">
+              <p className="text-muted mb-4">
+                The Institute produces content across a wide range of wargames, from tactical skirmish games to grand strategic simulations. Current focus areas include:
+              </p>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
+                <div className="flex items-start gap-2">
+                  <span className="text-tactical-cyan mt-1">▸</span>
+                  <div>
+                    <strong className="text-foreground">Warmachine</strong>
+                    <p className="text-xs text-muted">Tactical skirmish with combined arms</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-2">
+                  <span className="text-tactical-cyan mt-1">▸</span>
+                  <div>
+                    <strong className="text-foreground">Littoral Commander</strong>
+                    <p className="text-xs text-muted">Modern naval warfare simulation</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-2">
+                  <span className="text-tactical-cyan mt-1">▸</span>
+                  <div>
+                    <strong className="text-foreground">Next War Series</strong>
+                    <p className="text-xs text-muted">Operational-level modern conflict</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-2">
+                  <span className="text-tactical-cyan mt-1">▸</span>
+                  <div>
+                    <strong className="text-foreground">Range Patrolling Operations</strong>
+                    <p className="text-xs text-muted">Small unit tactics and recon</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-2">
+                  <span className="text-tactical-cyan mt-1">▸</span>
+                  <div>
+                    <strong className="text-foreground">Stalingrad (Avalon Hill 2nd Edition)</strong>
+                    <p className="text-xs text-muted">Historical operational wargame</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-2">
+                  <span className="text-tactical-cyan mt-1">▸</span>
+                  <div>
+                    <strong className="text-foreground">& Many Others</strong>
+                    <p className="text-xs text-muted">Expanding coverage regularly</p>
+                  </div>
+                </div>
+              </div>
+            </Card>
           </section>
 
           <TacticalDivider variant="dashed" />
